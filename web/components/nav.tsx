@@ -63,7 +63,7 @@ export function AppNav({ brandHref, links }: { brandHref: string; links: NavLink
                 <span className="max-w-32 truncate text-sm">{session.user?.name}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={() => signOut({ callbackUrl: "/" })}>Sign out</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>Sign out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
