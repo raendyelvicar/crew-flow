@@ -7,12 +7,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CrewFlow.Infrastructure.Identity;
 
-// Dev/demo convenience: seeds the four roles, one Admin account, and a handful of
-// dance styles so the scaffold is immediately usable without manual setup.
+// Dev/demo convenience: seeds the four roles, one account per staff role, and a
+// handful of dance styles so the scaffold is immediately usable without manual setup.
 public static class DataSeeder
 {
     public const string DefaultAdminEmail = "admin@crewflow.dev";
-    public const string DefaultAdminPassword = "ChangeMe123!";
+    public const string DefaultFinanceEmail = "finance@crewflow.dev";
+    public const string DefaultOperationalEmail = "operations@crewflow.dev";
+    public const string DefaultStaffPassword = "ChangeMe123!";
 
     public static async Task SeedAsync(IServiceProvider services)
     {
@@ -20,7 +22,7 @@ public static class DataSeeder
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var db = services.GetRequiredService<AppDbContext>();
 
-        foreach (var roleName in CrewFlow.Domain.Identity.RoleNames.All)
+        foreach (var roleName in RoleNames.All)
         {
             if (!await roleManager.RoleExistsAsync(roleName))
             {
@@ -28,24 +30,9 @@ public static class DataSeeder
             }
         }
 
-        var adminUser = await userManager.FindByEmailAsync(DefaultAdminEmail);
-        if (adminUser is null)
-        {
-            adminUser = new ApplicationUser
-            {
-                UserName = DefaultAdminEmail,
-                Email = DefaultAdminEmail,
-                EmailConfirmed = true,
-                FirstName = "Studio",
-                LastName = "Admin",
-            };
-
-            var result = await userManager.CreateAsync(adminUser, DefaultAdminPassword);
-            if (result.Succeeded)
-            {
-                await userManager.AddToRoleAsync(adminUser, CrewFlow.Domain.Identity.RoleNames.Admin);
-            }
-        }
+        await EnsureStaffUserAsync(userManager, DefaultAdminEmail, "Studio", "Admin", RoleNames.Admin);
+        await EnsureStaffUserAsync(userManager, DefaultFinanceEmail, "Studio", "Finance", RoleNames.Finance);
+        await EnsureStaffUserAsync(userManager, DefaultOperationalEmail, "Studio", "Operations", RoleNames.Operational);
 
         if (!await db.DanceStyles.AnyAsync())
         {
@@ -57,6 +44,31 @@ public static class DataSeeder
                 new DanceStyle { Id = Guid.NewGuid(), Name = "Ballet" });
 
             await db.SaveChangesAsync();
+        }
+    }
+
+    private static async Task EnsureStaffUserAsync(
+        UserManager<ApplicationUser> userManager, string email, string firstName, string lastName, string role)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is not null)
+        {
+            return;
+        }
+
+        user = new ApplicationUser
+        {
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true,
+            FirstName = firstName,
+            LastName = lastName,
+        };
+
+        var result = await userManager.CreateAsync(user, DefaultStaffPassword);
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(user, role);
         }
     }
 }
