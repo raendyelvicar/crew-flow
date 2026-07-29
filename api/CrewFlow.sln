@@ -1,0 +1,64 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2106EEE7-2574-47B5-8750-9698FCB32D8A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrewFlow.Domain", "src\CrewFlow.Domain\CrewFlow.Domain.csproj", "{BBCE5222-C08B-4891-A863-60076EDD9262}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrewFlow.Application", "src\CrewFlow.Application\CrewFlow.Application.csproj", "{29E56664-1B37-445B-80E3-F57FEA2EA7B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrewFlow.Infrastructure", "src\CrewFlow.Infrastructure\CrewFlow.Infrastructure.csproj", "{E3E5F129-252E-48CA-93F0-3FB0C7675E25}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrewFlow.Api", "src\CrewFlow.Api\CrewFlow.Api.csproj", "{76A5070A-48F5-47B7-98EC-2F4FD90731D5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0D52799E-FCEA-4865-AE9B-34EF7C2C88B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrewFlow.Application.Tests", "tests\CrewFlow.Application.Tests\CrewFlow.Application.Tests.csproj", "{4BE70CDD-152F-4C01-A2A2-7E548F054DE6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrewFlow.Api.Tests", "tests\CrewFlow.Api.Tests\CrewFlow.Api.Tests.csproj", "{7E42B216-339D-429C-8BFB-743DAA3D9576}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BBCE5222-C08B-4891-A863-60076EDD9262}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBCE5222-C08B-4891-A863-60076EDD9262}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBCE5222-C08B-4891-A863-60076EDD9262}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBCE5222-C08B-4891-A863-60076EDD9262}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29E56664-1B37-445B-80E3-F57FEA2EA7B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29E56664-1B37-445B-80E3-F57FEA2EA7B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29E56664-1B37-445B-80E3-F57FEA2EA7B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29E56664-1B37-445B-80E3-F57FEA2EA7B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3E5F129-252E-48CA-93F0-3FB0C7675E25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3E5F129-252E-48CA-93F0-3FB0C7675E25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3E5F129-252E-48CA-93F0-3FB0C7675E25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3E5F129-252E-48CA-93F0-3FB0C7675E25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76A5070A-48F5-47B7-98EC-2F4FD90731D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76A5070A-48F5-47B7-98EC-2F4FD90731D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76A5070A-48F5-47B7-98EC-2F4FD90731D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76A5070A-48F5-47B7-98EC-2F4FD90731D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BE70CDD-152F-4C01-A2A2-7E548F054DE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BE70CDD-152F-4C01-A2A2-7E548F054DE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BE70CDD-152F-4C01-A2A2-7E548F054DE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BE70CDD-152F-4C01-A2A2-7E548F054DE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E42B216-339D-429C-8BFB-743DAA3D9576}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E42B216-339D-429C-8BFB-743DAA3D9576}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E42B216-339D-429C-8BFB-743DAA3D9576}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E42B216-339D-429C-8BFB-743DAA3D9576}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BBCE5222-C08B-4891-A863-60076EDD9262} = {2106EEE7-2574-47B5-8750-9698FCB32D8A}
+		{29E56664-1B37-445B-80E3-F57FEA2EA7B2} = {2106EEE7-2574-47B5-8750-9698FCB32D8A}
+		{E3E5F129-252E-48CA-93F0-3FB0C7675E25} = {2106EEE7-2574-47B5-8750-9698FCB32D8A}
+		{76A5070A-48F5-47B7-98EC-2F4FD90731D5} = {2106EEE7-2574-47B5-8750-9698FCB32D8A}
+		{4BE70CDD-152F-4C01-A2A2-7E548F054DE6} = {0D52799E-FCEA-4865-AE9B-34EF7C2C88B7}
+		{7E42B216-339D-429C-8BFB-743DAA3D9576} = {0D52799E-FCEA-4865-AE9B-34EF7C2C88B7}
+	EndGlobalSection
+EndGlobal

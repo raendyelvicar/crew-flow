@@ -1,0 +1,32 @@
+## --- Environment / secrets ---
+.env
+.env.local
+.env.*.local
+
+## --- Node / Next.js (web/) ---
+web/node_modules/
+web/.next/
+web/out/
+web/build/
+web/.env.local
+web/.env*.local
+web/next-env.d.ts
+web/npm-debug.log*
+web/.turbo/
+*.tsbuildinfo
+
+## --- .NET (api/) ---
+api/**/bin/
+api/**/obj/
+api/**/*.user
+api/**/.vs/
+api/**/publish/
+
+## --- OS / editor ---
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+## --- Docker ---
+docker-compose.override.yml
