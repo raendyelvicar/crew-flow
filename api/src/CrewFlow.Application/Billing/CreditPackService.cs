@@ -29,7 +29,7 @@ public class CreditPackService
     public async Task<CreditPackResponse> CreateAsync(UpsertCreditPackRequest request, CancellationToken ct = default)
     {
         var (productId, priceId) = await _stripe.UpsertOneTimePriceAsync(
-            request.Name, request.Description, request.PriceCents, request.Currency, null, ct);
+            request.Name, request.Description, request.PriceAmount, request.Currency, null, ct);
 
         var pack = new CreditPack
         {
@@ -37,7 +37,7 @@ public class CreditPackService
             Name = request.Name,
             Description = request.Description,
             CreditCount = request.CreditCount,
-            PriceCents = request.PriceCents,
+            PriceAmount = request.PriceAmount,
             Currency = request.Currency,
             StripeProductId = productId,
             StripePriceId = priceId,
@@ -56,12 +56,12 @@ public class CreditPackService
             ?? throw new NotFoundException(nameof(CreditPack), id);
 
         var (productId, priceId) = await _stripe.UpsertOneTimePriceAsync(
-            request.Name, request.Description, request.PriceCents, request.Currency, pack.StripeProductId, ct);
+            request.Name, request.Description, request.PriceAmount, request.Currency, pack.StripeProductId, ct);
 
         pack.Name = request.Name;
         pack.Description = request.Description;
         pack.CreditCount = request.CreditCount;
-        pack.PriceCents = request.PriceCents;
+        pack.PriceAmount = request.PriceAmount;
         pack.Currency = request.Currency;
         pack.StripeProductId = productId;
         pack.StripePriceId = priceId;
@@ -112,5 +112,5 @@ public class CreditPackService
     }
 
     private static CreditPackResponse Map(CreditPack p) => new(
-        p.Id, p.Name, p.Description, p.CreditCount, p.PriceCents, p.Currency, p.ExpiryDays, p.IsActive);
+        p.Id, p.Name, p.Description, p.CreditCount, p.PriceAmount, p.Currency, p.ExpiryDays, p.IsActive);
 }

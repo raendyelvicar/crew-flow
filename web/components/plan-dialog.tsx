@@ -18,7 +18,7 @@ export function PlanDialog({ plan }: { plan?: MembershipPlan }) {
     name: plan?.name ?? "",
     description: plan?.description ?? "",
     billingInterval: plan?.billingInterval ?? "Monthly",
-    priceCents: plan?.priceCents.toString() ?? "",
+    priceAmount: plan?.priceAmount.toString() ?? "",
     isActive: plan?.isActive ?? true,
   });
 
@@ -82,8 +82,8 @@ export function PlanDialog({ plan }: { plan?: MembershipPlan }) {
                 type="number"
                 min={0}
                 required
-                value={form.priceCents}
-                onChange={(e) => setForm({ ...form, priceCents: e.target.value })}
+                value={form.priceAmount}
+                onChange={(e) => setForm({ ...form, priceAmount: e.target.value })}
               />
             </div>
           </div>

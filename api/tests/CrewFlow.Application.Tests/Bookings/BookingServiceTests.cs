@@ -24,7 +24,7 @@ public class BookingServiceTests : IDisposable
 
         await using (var db = _factory.CreateContext())
         {
-            var plan = new MembershipPlan { Id = Guid.NewGuid(), Name = "Monthly", BillingInterval = BillingInterval.Monthly, PriceCents = 5000 };
+            var plan = new MembershipPlan { Id = Guid.NewGuid(), Name = "Monthly", BillingInterval = BillingInterval.Monthly, PriceAmount = 5000 };
             var genre = new DanceStyle { Id = Guid.NewGuid(), Name = "Salsa" };
             var classType = new ClassType { Id = Guid.NewGuid(), Name = "Regular" };
             var activity = new Activity { Id = Guid.NewGuid(), Name = "Salsa", ClassGenreId = genre.Id, ClassTypeId = classType.Id, DefaultCapacity = 1, DefaultDurationMinutes = 60 };

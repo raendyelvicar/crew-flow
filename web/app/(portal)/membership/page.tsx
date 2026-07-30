@@ -68,7 +68,7 @@ export default async function MembershipPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-2xl font-bold">
-                  {formatMoney(plan.priceCents, plan.currency)}
+                  {formatMoney(plan.priceAmount, plan.currency)}
                   <span className="text-sm font-normal text-muted-foreground">
                     /{plan.billingInterval === "Monthly" ? "mo" : "yr"}
                   </span>
@@ -90,7 +90,7 @@ export default async function MembershipPage() {
                 <CardDescription>{pack.creditCount} classes{pack.expiryDays ? ` - expires in ${pack.expiryDays} days` : ""}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-2xl font-bold">{formatMoney(pack.priceCents, pack.currency)}</p>
+                <p className="text-2xl font-bold">{formatMoney(pack.priceAmount, pack.currency)}</p>
                 <BuyCreditsButton creditPackId={pack.id} />
               </CardContent>
             </Card>

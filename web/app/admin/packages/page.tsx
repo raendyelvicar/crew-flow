@@ -32,7 +32,7 @@ export default async function PackagesPage() {
                   <Badge variant={plan.isActive ? "default" : "secondary"}>{plan.isActive ? "Active" : "Inactive"}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {formatMoney(plan.priceCents, plan.currency)} / {plan.billingInterval === "Monthly" ? "mo" : "yr"}
+                  {formatMoney(plan.priceAmount, plan.currency)} / {plan.billingInterval === "Monthly" ? "mo" : "yr"}
                 </p>
               </div>
               <PlanDialog plan={plan} />
@@ -55,7 +55,7 @@ export default async function PackagesPage() {
                   <Badge variant={pack.isActive ? "default" : "secondary"}>{pack.isActive ? "Active" : "Inactive"}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {formatMoney(pack.priceCents, pack.currency)} - {pack.creditCount} credits
+                  {formatMoney(pack.priceAmount, pack.currency)} - {pack.creditCount} credits
                   {pack.expiryDays ? ` - expires in ${pack.expiryDays} days` : ""}
                 </p>
               </div>

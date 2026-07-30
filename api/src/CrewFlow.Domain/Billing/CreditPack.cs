@@ -6,7 +6,7 @@ public class CreditPack
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public int CreditCount { get; set; }
-    public int PriceCents { get; set; }
+    public int PriceAmount { get; set; }
     public string Currency { get; set; } = "usd";
     public string? StripePriceId { get; set; }
     public string? StripeProductId { get; set; }

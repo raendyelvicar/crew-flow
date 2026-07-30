@@ -12,8 +12,10 @@ namespace CrewFlow.Infrastructure.Identity;
 
 // Demo data modeled on a real Jakarta dance studio's actual class roster (provided by the
 // studio owner), so the scaffold has a believable, non-trivial dataset out of the box.
-// Prices are IDR (a zero-decimal currency) and are not yet synced to Stripe - an admin
-// re-saving a plan/pack via the admin UI creates the corresponding Stripe Product/Price.
+// PriceAmount is the literal Rupiah figure (e.g. 400_000 = Rp400,000) - StripeService
+// converts it to Stripe's unit_amount convention only at the API call boundary. Not yet
+// synced to Stripe - an admin re-saving a plan/pack via the admin UI creates the
+// corresponding Stripe Product/Price.
 public static class StudioDemoSeeder
 {
     private const string DemoPassword = "ChangeMe123!";
@@ -192,19 +194,19 @@ public static class StudioDemoSeeder
             new MembershipPlan
             {
                 Id = Guid.NewGuid(), Name = "Regular Class Membership", Description = "Unlimited regular weekly classes.",
-                BillingInterval = BillingInterval.Monthly, PriceCents = 400000, Currency = "idr", IsActive = true, SortOrder = 0,
+                BillingInterval = BillingInterval.Monthly, PriceAmount = 400_000, Currency = "idr", IsActive = true, SortOrder = 0,
             },
             new MembershipPlan
             {
                 Id = Guid.NewGuid(), Name = "Kids Class Membership", Description = "Unlimited kids classes.",
-                BillingInterval = BillingInterval.Monthly, PriceCents = 460000, Currency = "idr", IsActive = true, SortOrder = 1,
+                BillingInterval = BillingInterval.Monthly, PriceAmount = 460_000, Currency = "idr", IsActive = true, SortOrder = 1,
             });
 
         db.CreditPacks.AddRange(
-            new CreditPack { Id = Guid.NewGuid(), Name = "Open Class - 1 Visit", Description = "Single drop-in open class.", CreditCount = 1, PriceCents = 150000, Currency = "idr", IsActive = true },
-            new CreditPack { Id = Guid.NewGuid(), Name = "Open Class - 4 Visits", Description = "Valid for 1 month.", CreditCount = 4, PriceCents = 500000, Currency = "idr", ExpiryDays = 30, IsActive = true },
-            new CreditPack { Id = Guid.NewGuid(), Name = "Open Class - 8 Visits", Description = "Valid for 2 months.", CreditCount = 8, PriceCents = 900000, Currency = "idr", ExpiryDays = 60, IsActive = true },
-            new CreditPack { Id = Guid.NewGuid(), Name = "Kids Class Trial", Description = "1x visit trial.", CreditCount = 1, PriceCents = 100000, Currency = "idr", IsActive = true });
+            new CreditPack { Id = Guid.NewGuid(), Name = "Open Class - 1 Visit", Description = "Single drop-in open class.", CreditCount = 1, PriceAmount = 150_000, Currency = "idr", IsActive = true },
+            new CreditPack { Id = Guid.NewGuid(), Name = "Open Class - 4 Visits", Description = "Valid for 1 month.", CreditCount = 4, PriceAmount = 500_000, Currency = "idr", ExpiryDays = 30, IsActive = true },
+            new CreditPack { Id = Guid.NewGuid(), Name = "Open Class - 8 Visits", Description = "Valid for 2 months.", CreditCount = 8, PriceAmount = 900_000, Currency = "idr", ExpiryDays = 60, IsActive = true },
+            new CreditPack { Id = Guid.NewGuid(), Name = "Kids Class Trial", Description = "1x visit trial.", CreditCount = 1, PriceAmount = 100_000, Currency = "idr", IsActive = true });
 
         await db.SaveChangesAsync();
     }

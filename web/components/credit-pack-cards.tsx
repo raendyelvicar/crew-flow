@@ -23,7 +23,7 @@ export function CreditPackCards({ packs }: { packs: CreditPack[] }) {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-1">
-            <p className="text-3xl font-bold">{formatMoney(pack.priceCents, pack.currency)}</p>
+            <p className="text-3xl font-bold">{formatMoney(pack.priceAmount, pack.currency)}</p>
           </CardContent>
           <CardFooter>
             <Link href="/register" className={buttonVariants({ className: "w-full" })}>

@@ -29,7 +29,7 @@ public class MembershipPlanService
     {
         var interval = request.BillingInterval == BillingInterval.Monthly ? "month" : "year";
         var (productId, priceId) = await _stripe.UpsertPlanPriceAsync(
-            request.Name, request.Description, request.PriceCents, request.Currency, interval, null, ct);
+            request.Name, request.Description, request.PriceAmount, request.Currency, interval, null, ct);
 
         var plan = new MembershipPlan
         {
@@ -37,7 +37,7 @@ public class MembershipPlanService
             Name = request.Name,
             Description = request.Description,
             BillingInterval = request.BillingInterval,
-            PriceCents = request.PriceCents,
+            PriceAmount = request.PriceAmount,
             Currency = request.Currency,
             StripeProductId = productId,
             StripePriceId = priceId,
@@ -57,12 +57,12 @@ public class MembershipPlanService
 
         var interval = request.BillingInterval == BillingInterval.Monthly ? "month" : "year";
         var (productId, priceId) = await _stripe.UpsertPlanPriceAsync(
-            request.Name, request.Description, request.PriceCents, request.Currency, interval, plan.StripeProductId, ct);
+            request.Name, request.Description, request.PriceAmount, request.Currency, interval, plan.StripeProductId, ct);
 
         plan.Name = request.Name;
         plan.Description = request.Description;
         plan.BillingInterval = request.BillingInterval;
-        plan.PriceCents = request.PriceCents;
+        plan.PriceAmount = request.PriceAmount;
         plan.Currency = request.Currency;
         plan.StripeProductId = productId;
         plan.StripePriceId = priceId;
@@ -74,5 +74,5 @@ public class MembershipPlanService
     }
 
     private static MembershipPlanResponse Map(MembershipPlan p) => new(
-        p.Id, p.Name, p.Description, p.BillingInterval, p.PriceCents, p.Currency, p.IsActive, p.SortOrder);
+        p.Id, p.Name, p.Description, p.BillingInterval, p.PriceAmount, p.Currency, p.IsActive, p.SortOrder);
 }

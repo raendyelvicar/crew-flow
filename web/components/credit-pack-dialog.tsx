@@ -17,7 +17,7 @@ export function CreditPackDialog({ pack }: { pack?: CreditPack }) {
     name: pack?.name ?? "",
     description: pack?.description ?? "",
     creditCount: pack?.creditCount.toString() ?? "",
-    priceCents: pack?.priceCents.toString() ?? "",
+    priceAmount: pack?.priceAmount.toString() ?? "",
     expiryDays: pack?.expiryDays?.toString() ?? "",
     isActive: pack?.isActive ?? true,
   });
@@ -76,8 +76,8 @@ export function CreditPackDialog({ pack }: { pack?: CreditPack }) {
                 type="number"
                 min={0}
                 required
-                value={form.priceCents}
-                onChange={(e) => setForm({ ...form, priceCents: e.target.value })}
+                value={form.priceAmount}
+                onChange={(e) => setForm({ ...form, priceAmount: e.target.value })}
               />
             </div>
             <div className="space-y-2">

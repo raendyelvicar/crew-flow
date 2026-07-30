@@ -11,11 +11,25 @@ public class StripeService : IStripeService
 {
     private readonly StripeOptions _options;
 
+    // Stripe's actual zero-decimal currency list - these are billed in whole units with no
+    // "cents" multiplier. Everything else (including IDR, despite having no everyday
+    // subunit) must be multiplied by 100 to become Stripe's unit_amount.
+    private static readonly HashSet<string> StripeZeroDecimalCurrencies = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga", "pyg", "rwf", "ugx", "vnd", "vuv", "xaf", "xof", "xpf",
+    };
+
     public StripeService(IOptions<StripeOptions> options)
     {
         _options = options.Value;
         StripeConfiguration.ApiKey = _options.SecretKey;
     }
+
+    // `priceAmount` throughout this app is always the literal amount in the currency's major
+    // unit (e.g. 400000 means Rp400,000) - this converts it to Stripe's unit_amount convention
+    // right at the API boundary, so the rest of the app never has to think in "cents".
+    private static long ToStripeUnitAmount(int priceAmount, string currency)
+        => StripeZeroDecimalCurrencies.Contains(currency) ? priceAmount : priceAmount * 100L;
 
     public async Task<string> GetOrCreateCustomerAsync(Guid memberId, string email, string name, CancellationToken ct = default)
     {
@@ -104,7 +118,7 @@ public class StripeService : IStripeService
     }
 
     public async Task<(string ProductId, string PriceId)> UpsertPlanPriceAsync(
-        string name, string? description, int priceCents, string currency, string interval, string? existingProductId, CancellationToken ct = default)
+        string name, string? description, int priceAmount, string currency, string interval, string? existingProductId, CancellationToken ct = default)
     {
         var productId = await UpsertProductAsync(name, description, existingProductId, ct);
 
@@ -113,7 +127,7 @@ public class StripeService : IStripeService
         var price = await priceService.CreateAsync(new PriceCreateOptions
         {
             Product = productId,
-            UnitAmount = priceCents,
+            UnitAmount = ToStripeUnitAmount(priceAmount, currency),
             Currency = currency,
             Recurring = new PriceRecurringOptions { Interval = interval },
         }, cancellationToken: ct);
@@ -122,7 +136,7 @@ public class StripeService : IStripeService
     }
 
     public async Task<(string ProductId, string PriceId)> UpsertOneTimePriceAsync(
-        string name, string? description, int priceCents, string currency, string? existingProductId, CancellationToken ct = default)
+        string name, string? description, int priceAmount, string currency, string? existingProductId, CancellationToken ct = default)
     {
         var productId = await UpsertProductAsync(name, description, existingProductId, ct);
 
@@ -130,7 +144,7 @@ public class StripeService : IStripeService
         var price = await priceService.CreateAsync(new PriceCreateOptions
         {
             Product = productId,
-            UnitAmount = priceCents,
+            UnitAmount = ToStripeUnitAmount(priceAmount, currency),
             Currency = currency,
         }, cancellationToken: ct);
 

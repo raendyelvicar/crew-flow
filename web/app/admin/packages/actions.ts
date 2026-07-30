@@ -8,7 +8,7 @@ export type PlanFormInput = {
   name: string;
   description: string;
   billingInterval: BillingInterval;
-  priceCents: string;
+  priceAmount: string;
   isActive: boolean;
 };
 
@@ -17,7 +17,7 @@ export async function savePlan(id: string | null, form: PlanFormInput) {
     name: form.name,
     description: form.description || undefined,
     billingInterval: form.billingInterval,
-    priceCents: Number(form.priceCents),
+    priceAmount: Number(form.priceAmount),
     currency: "idr",
     isActive: form.isActive,
     sortOrder: 0,
@@ -38,7 +38,7 @@ export type CreditPackFormInput = {
   name: string;
   description: string;
   creditCount: string;
-  priceCents: string;
+  priceAmount: string;
   expiryDays: string;
   isActive: boolean;
 };
@@ -48,7 +48,7 @@ export async function saveCreditPack(id: string | null, form: CreditPackFormInpu
     name: form.name,
     description: form.description || undefined,
     creditCount: Number(form.creditCount),
-    priceCents: Number(form.priceCents),
+    priceAmount: Number(form.priceAmount),
     currency: "idr",
     expiryDays: form.expiryDays ? Number(form.expiryDays) : undefined,
     isActive: form.isActive,

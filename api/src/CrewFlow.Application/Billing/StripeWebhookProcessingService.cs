@@ -127,7 +127,7 @@ public class StripeWebhookProcessingService
 
     private async Task HandleInvoicePaidAsync(StripeWebhookEvent evt, CancellationToken ct)
     {
-        if (evt.StripeInvoiceId is null || evt.AmountPaidCents is null) return;
+        if (evt.StripeInvoiceId is null || evt.AmountPaid is null) return;
 
         var alreadyRecorded = await _db.CashflowEntries.AnyAsync(e => e.ReferenceStripeObjectId == evt.StripeInvoiceId, ct);
         if (alreadyRecorded) return;
@@ -148,7 +148,7 @@ public class StripeWebhookProcessingService
         {
             Id = Guid.NewGuid(),
             MemberId = memberId,
-            Amount = evt.AmountPaidCents.Value / 100m,
+            Amount = evt.AmountPaid.Value / 100m,
             Currency = evt.Currency ?? "usd",
             Source = CashflowSource.StripeInvoice,
             Category = CashflowCategory.Membership,

@@ -137,7 +137,7 @@ export type MembershipPlan = {
   name: string;
   description?: string;
   billingInterval: BillingInterval;
-  priceCents: number;
+  priceAmount: number;
   currency: string;
   isActive: boolean;
   sortOrder: number;
@@ -168,7 +168,7 @@ export type CreditPack = {
   name: string;
   description?: string;
   creditCount: number;
-  priceCents: number;
+  priceAmount: number;
   currency: string;
   expiryDays?: number;
   isActive: boolean;

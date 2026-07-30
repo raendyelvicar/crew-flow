@@ -15,7 +15,7 @@ public record StripeWebhookEvent(
     DateTime? CurrentPeriodStartUtc,
     DateTime? CurrentPeriodEndUtc,
     bool CancelAtPeriodEnd,
-    long? AmountPaidCents,
+    long? AmountPaid,
     string? Currency,
     IReadOnlyDictionary<string, string> Metadata);
 
@@ -44,7 +44,7 @@ public interface IStripeService
     Task<(string ProductId, string PriceId)> UpsertPlanPriceAsync(
         string name,
         string? description,
-        int priceCents,
+        int priceAmount,
         string currency,
         string interval,
         string? existingProductId,
@@ -53,7 +53,7 @@ public interface IStripeService
     Task<(string ProductId, string PriceId)> UpsertOneTimePriceAsync(
         string name,
         string? description,
-        int priceCents,
+        int priceAmount,
         string currency,
         string? existingProductId,
         CancellationToken ct = default);
