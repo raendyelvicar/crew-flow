@@ -7,36 +7,34 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { createClassSchedule } from "@/app/admin/schedule/actions";
-import type { Activity } from "@/lib/types";
+import { Switch } from "@/components/ui/switch";
+import { createClassSchedule, updateClassSchedule, type ClassScheduleFormInput } from "@/app/admin/schedule/actions";
+import type { Activity, ClassSchedule } from "@/lib/types";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-export function CreateClassScheduleDialog({ activities }: { activities: Activity[] }) {
+export function CreateClassScheduleDialog({ activities, schedule }: { activities: Activity[]; schedule?: ClassSchedule }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [form, setForm] = useState({
-    activityId: activities[0]?.id ?? "",
-    instructorUserId: "",
-    dayOfWeek: "1",
-    startTimeLocal: "18:00",
-    durationMinutes: "60",
-    capacity: "12",
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  const [form, setForm] = useState<ClassScheduleFormInput>({
+    activityId: schedule?.activityId ?? activities[0]?.id ?? "",
+    instructorUserId: schedule?.instructorUserId ?? "",
+    dayOfWeek: schedule ? DAYS.indexOf(schedule.dayOfWeek).toString() : "1",
+    startTimeLocal: schedule?.startTimeLocal.slice(0, 5) ?? "18:00",
+    durationMinutes: schedule?.durationMinutes.toString() ?? "60",
+    capacity: schedule?.capacity.toString() ?? "12",
+    timezone: schedule?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+    isActive: schedule?.isActive ?? true,
   });
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const payload = { ...form, startTimeLocal: `${form.startTimeLocal}:00` };
+
     startTransition(async () => {
-      const result = await createClassSchedule({
-        activityId: form.activityId,
-        instructorUserId: form.instructorUserId,
-        dayOfWeek: Number(form.dayOfWeek),
-        startTimeLocal: `${form.startTimeLocal}:00`,
-        durationMinutes: Number(form.durationMinutes),
-        capacity: Number(form.capacity),
-        timezone: form.timezone,
-      });
+      const result = schedule
+        ? await updateClassSchedule(schedule.id, payload, schedule.effectiveFromDate)
+        : await createClassSchedule(payload);
       if (result.success) {
         toast.success(result.message);
         setOpen(false);
@@ -48,27 +46,31 @@ export function CreateClassScheduleDialog({ activities }: { activities: Activity
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button disabled={activities.length === 0} />}>Add weekly class</DialogTrigger>
+      <DialogTrigger render={<Button disabled={!schedule && activities.length === 0} variant={schedule ? "outline" : "default"} size={schedule ? "sm" : "default"} />}>
+        {schedule ? "Edit" : "Add weekly class"}
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add a recurring weekly class</DialogTitle>
+          <DialogTitle>{schedule ? "Edit recurring class" : "Add a recurring weekly class"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label>Activity</Label>
-            <Select value={form.activityId} onValueChange={(v) => setForm({ ...form, activityId: v ?? "" })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {activities.map((activity) => (
-                  <SelectItem key={activity.id} value={activity.id}>
-                    {activity.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!schedule && (
+            <div className="space-y-2">
+              <Label>Activity</Label>
+              <Select value={form.activityId} onValueChange={(v) => v && setForm({ ...form, activityId: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {activities.map((activity) => (
+                    <SelectItem key={activity.id} value={activity.id}>
+                      {activity.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="instructorUserId">Instructor user ID</Label>
             <Input
@@ -82,7 +84,7 @@ export function CreateClassScheduleDialog({ activities }: { activities: Activity
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Day of week</Label>
-              <Select value={form.dayOfWeek} onValueChange={(v) => setForm({ ...form, dayOfWeek: v ?? "1" })}>
+              <Select value={form.dayOfWeek} onValueChange={(v) => v && setForm({ ...form, dayOfWeek: v })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -130,6 +132,12 @@ export function CreateClassScheduleDialog({ activities }: { activities: Activity
               />
             </div>
           </div>
+          {schedule && (
+            <div className="flex items-center gap-2">
+              <Switch id="isActive" checked={form.isActive} onCheckedChange={(v) => setForm({ ...form, isActive: v })} />
+              <Label htmlFor="isActive">Active</Label>
+            </div>
+          )}
           <DialogFooter>
             <Button type="submit" disabled={isPending}>
               {isPending ? "Saving..." : "Save"}

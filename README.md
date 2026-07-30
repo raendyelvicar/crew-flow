@@ -1,6 +1,6 @@
 # Crew Flow
 
-A community management platform for a dance studio — landing page + CMS, member management (with rich community profiles), activity scheduling, class booking with waitlists, and Stripe-backed memberships/credit packs.
+A community management platform for a dance studio — member management (with rich community profiles), activity scheduling with a weekly calendar view, class booking with waitlists, and Stripe-backed memberships/credit packs.
 
 ## Stack
 
@@ -23,10 +23,11 @@ crew-flow/
 │   └── tests/
 ├── web/                       Next.js app
 │   ├── app/
-│   │   ├── (marketing)/       public site — CMS-driven, pricing, community directory
+│   │   ├── (marketing)/       public site — pricing, community directory
 │   │   ├── (auth)/            login / register
 │   │   ├── (portal)/          member area — dashboard, classes, bookings, membership
-│   │   └── admin/             back office — members, schedule, cashflow, CMS editor
+│   │   └── admin/             back office — members, schedule (calendar), coaches,
+│   │                          class genres/types, packages, cashflow
 │   ├── components/            shared UI + shadcn/ui primitives
 │   └── lib/                   auth.ts (NextAuth config), api-client.ts, types.ts
 └── docker-compose.yml
@@ -38,6 +39,18 @@ crew-flow/
 - **Finance** — cashflow, membership plans, subscriptions, credit packs
 - **Operational** — activities, class schedules, occurrences, instructors, roster/check-in, members
 - **Member** — the single community-facing role (books classes, manages own subscription/credits; a member with no active subscription just books drop-in via credit packs)
+
+## Admin features (CRUD)
+
+- **Members** — `/admin/members` — list, create, edit profile/contact/dance styles, change status
+- **Coaches** — `/admin/coaches` — create a new coach account (login + Operational role) or edit an existing one, assign styles taught
+- **Class Genres** — `/admin/class-genres` — the dance-style list used both for classifying classes and member community profiles (K-Pop, Contemporary, Nusantara, ...)
+- **Class Types** — `/admin/class-types` — Regular, Open, Kids, ICM Course, or any others you define
+- **Schedule** — `/admin/schedule` — weekly calendar view (mobile: stacked days, desktop: 7-column grid) plus CRUD for Activities and recurring Class Schedules
+- **Packages** — `/admin/packages` — membership plans and drop-in credit packs
+- **Cashflow** — `/admin/cashflow` — manual entries, summary, Stripe-sourced entries
+
+All "delete" actions are soft (an `isActive`/status toggle) rather than hard deletes, since these entities are referenced by booking/schedule history that shouldn't be destroyed.
 
 ## Running locally
 
@@ -55,11 +68,15 @@ crew-flow/
    - API health check: http://localhost:5080/health
    - API Swagger (dev only): http://localhost:5080/swagger
 
-A default Admin account is seeded on first run:
-- **Email**: `admin@crewflow.dev`
-- **Password**: `ChangeMe123!`
+Seeded accounts (password `ChangeMe123!` for all):
 
-Five sample dance styles (Salsa, Bachata, Hip-Hop, Contemporary, Ballet) are also seeded.
+| Role | Email |
+|---|---|
+| Admin | `admin@crewflow.dev` |
+| Finance | `finance@crewflow.dev` |
+| Operational | `operations@crewflow.dev` |
+
+The database is also seeded with a real studio's class roster (13 activities, 18 weekly class schedules, 15 coach accounts, 2 membership plans, 4 credit packs, priced in IDR) so there's a believable dataset to explore immediately — see `api/src/CrewFlow.Infrastructure/Identity/StudioDemoSeeder.cs`. Coach accounts log in as `{firstname}@strdc.demo`.
 
 ### Running the API outside Docker
 
@@ -88,7 +105,7 @@ The scaffold's Stripe integration (Checkout Sessions for subscriptions and credi
    ```bash
    stripe listen --forward-to localhost:5080/api/v1/webhooks/stripe
    ```
-3. Create a membership plan or credit pack via the admin UI (or `POST /api/v1/membership-plans` / `POST /api/v1/credit-packs`) — this calls Stripe to create the Product/Price.
+3. Create/edit a membership plan or credit pack via `/admin/packages` — this calls Stripe to create the Product/Price. The seeded IDR plans/packs aren't synced to Stripe until you re-save them this way.
 4. From the member portal's Membership page, subscribing/buying a pack redirects to a real Stripe Checkout session.
 
 Without real keys, the checkout/webhook endpoints will return errors from Stripe's API — everything else in the app works independently of Stripe.
@@ -110,7 +127,7 @@ dotnet test
 
 ## Known follow-ups (not implemented in this scaffold)
 
-- CMS media is stored as external URL strings — no upload/asset library.
+- No CMS/landing-page editor — the public marketing site is static content plus live pricing.
 - The "Add weekly class" admin form asks for an instructor's raw user ID (no staff picker UI yet).
 - No automated occurrence-generation job — new `ClassSchedule`s generate the next 8 weeks on creation; call `POST /api/v1/class-schedules/{id}/generate-occurrences` periodically (e.g. a nightly cron) to keep the horizon rolling forward.
 - No email delivery (password reset, booking confirmations, waitlist-promotion notifications).

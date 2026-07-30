@@ -1,13 +1,17 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MemberStatusSelect } from "@/components/member-status-select";
+import { MemberProfileForm } from "@/components/member-profile-form";
+import { MemberDanceStylesForm } from "@/components/member-dance-styles-form";
 import { apiClient } from "@/lib/api-client";
-import type { Member } from "@/lib/types";
+import type { DanceStyle, Member } from "@/lib/types";
 
 export default async function MemberDetailPage({ params }: PageProps<"/admin/members/[id]">) {
   const { id } = await params;
-  const member = await apiClient.get<Member>(`/api/v1/members/${id}`);
+  const [member, danceStyles] = await Promise.all([
+    apiClient.get<Member>(`/api/v1/members/${id}`),
+    apiClient.get<DanceStyle[]>("/api/v1/dance-styles?activeOnly=true"),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -24,20 +28,22 @@ export default async function MemberDetailPage({ params }: PageProps<"/admin/mem
               {member.firstName} {member.lastName}
             </h1>
             <p className="text-sm text-muted-foreground">{member.email}</p>
+            <p className="text-xs text-muted-foreground">
+              Joined {new Date(member.joinedAtUtc).toLocaleDateString()} -{" "}
+              {member.userId ? "Account linked" : "Front-desk record (no account yet)"}
+            </p>
           </div>
         </div>
         <MemberStatusSelect memberId={member.id} status={member.status} />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Contact</CardTitle>
+            <CardTitle className="text-base">Profile</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1 text-sm">
-            <p>Phone: {member.phone ?? "-"}</p>
-            <p>Joined: {new Date(member.joinedAtUtc).toLocaleDateString()}</p>
-            <p>Account linked: {member.userId ? "Yes" : "No (front-desk record)"}</p>
+          <CardContent>
+            <MemberProfileForm member={member} />
           </CardContent>
         </Card>
 
@@ -45,28 +51,11 @@ export default async function MemberDetailPage({ params }: PageProps<"/admin/mem
           <CardHeader>
             <CardTitle className="text-base">Dance styles</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-wrap gap-1.5">
-            {member.danceStyles.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No styles set.</p>
-            ) : (
-              member.danceStyles.map((style) => (
-                <Badge key={style.danceStyleId} variant="secondary">
-                  {style.danceStyleName} - {style.skillLevel}
-                </Badge>
-              ))
-            )}
+          <CardContent>
+            <MemberDanceStylesForm member={member} danceStyles={danceStyles} />
           </CardContent>
         </Card>
       </div>
-
-      {member.notes && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Staff notes</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">{member.notes}</CardContent>
-        </Card>
-      )}
     </div>
   );
 }

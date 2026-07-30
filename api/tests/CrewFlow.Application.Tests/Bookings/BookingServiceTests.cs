@@ -25,7 +25,9 @@ public class BookingServiceTests : IDisposable
         await using (var db = _factory.CreateContext())
         {
             var plan = new MembershipPlan { Id = Guid.NewGuid(), Name = "Monthly", BillingInterval = BillingInterval.Monthly, PriceCents = 5000 };
-            var activity = new Activity { Id = Guid.NewGuid(), Name = "Salsa", Category = "Salsa", DefaultCapacity = 1, DefaultDurationMinutes = 60 };
+            var genre = new DanceStyle { Id = Guid.NewGuid(), Name = "Salsa" };
+            var classType = new ClassType { Id = Guid.NewGuid(), Name = "Regular" };
+            var activity = new Activity { Id = Guid.NewGuid(), Name = "Salsa", ClassGenreId = genre.Id, ClassTypeId = classType.Id, DefaultCapacity = 1, DefaultDurationMinutes = 60 };
             var instructorId = Guid.NewGuid();
             var schedule = new ClassSchedule
             {
@@ -52,6 +54,8 @@ public class BookingServiceTests : IDisposable
             };
 
             db.MembershipPlans.Add(plan);
+            db.DanceStyles.Add(genre);
+            db.ClassTypes.Add(classType);
             db.Members.Add(new Member { Id = memberAId, FirstName = "A", LastName = "A", Email = "a@test.com" });
             db.Members.Add(new Member { Id = memberBId, FirstName = "B", LastName = "B", Email = "b@test.com" });
             db.Users.Add(new ApplicationUser { Id = instructorId, UserName = "instructor@test.com", Email = "instructor@test.com", FirstName = "In", LastName = "Structor" });
@@ -87,7 +91,9 @@ public class BookingServiceTests : IDisposable
 
         await using (var db = _factory.CreateContext())
         {
-            var activity = new Activity { Id = Guid.NewGuid(), Name = "Salsa", Category = "Salsa", DefaultCapacity = 5, DefaultDurationMinutes = 60 };
+            var genre = new DanceStyle { Id = Guid.NewGuid(), Name = "Salsa" };
+            var classType = new ClassType { Id = Guid.NewGuid(), Name = "Regular" };
+            var activity = new Activity { Id = Guid.NewGuid(), Name = "Salsa", ClassGenreId = genre.Id, ClassTypeId = classType.Id, DefaultCapacity = 5, DefaultDurationMinutes = 60 };
             var instructorId = Guid.NewGuid();
             var schedule = new ClassSchedule
             {
@@ -113,6 +119,8 @@ public class BookingServiceTests : IDisposable
                 Status = OccurrenceStatus.Scheduled,
             };
 
+            db.DanceStyles.Add(genre);
+            db.ClassTypes.Add(classType);
             db.Members.Add(new Member { Id = memberId, FirstName = "C", LastName = "C", Email = "c@test.com" });
             db.Users.Add(new ApplicationUser { Id = instructorId, UserName = "instructor2@test.com", Email = "instructor2@test.com", FirstName = "In", LastName = "Structor" });
             db.Activities.Add(activity);

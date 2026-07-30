@@ -64,6 +64,11 @@ public class MembersController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
+    [HttpPatch("{id:guid}")]
+    [Authorize(Policy = PolicyNames.OperationalAccess)]
+    public async Task<ActionResult<MemberResponse>> Update(Guid id, UpdateMemberProfileRequest request, CancellationToken ct)
+        => Ok(await _memberService.UpdateProfileAsync(id, request, ct));
+
     [HttpPatch("{id:guid}/status")]
     [Authorize(Policy = PolicyNames.OperationalAccess)]
     public async Task<ActionResult<MemberResponse>> UpdateStatus(Guid id, UpdateMemberStatusRequest request, CancellationToken ct)

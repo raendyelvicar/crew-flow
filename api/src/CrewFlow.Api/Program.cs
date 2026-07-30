@@ -95,6 +95,7 @@ if (builder.Configuration.GetValue<bool>("AutoMigrate"))
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
     await DataSeeder.SeedAsync(scope.ServiceProvider);
+    await StudioDemoSeeder.SeedAsync(scope.ServiceProvider);
 }
 
 app.Run();

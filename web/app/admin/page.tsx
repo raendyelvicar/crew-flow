@@ -12,9 +12,12 @@ export default async function AdminHomePage() {
 
   const sections = [
     isOperational && { href: "/admin/members", title: "Members", description: "Manage member profiles and status." },
-    isOperational && { href: "/admin/schedule", title: "Schedule", description: "Activities, class schedules and rosters." },
+    isOperational && { href: "/admin/schedule", title: "Schedule", description: "Calendar, activities, and class schedules." },
+    isOperational && { href: "/admin/coaches", title: "Coaches", description: "Manage instructor profiles." },
+    isOperational && { href: "/admin/class-genres", title: "Class Genres", description: "K-Pop, Contemporary, Hip-Hop, and more." },
+    isOperational && { href: "/admin/class-types", title: "Class Types", description: "Regular, Open, Kids, ICM Course." },
     isFinance && { href: "/admin/cashflow", title: "Cashflow", description: "Track income, refunds, and reconciliation." },
-    isAdmin && { href: "/admin/cms", title: "CMS", description: "Edit the public marketing site." },
+    isFinance && { href: "/admin/packages", title: "Packages", description: "Membership plans and drop-in credit packs." },
   ].filter(Boolean) as { href: string; title: string; description: string }[];
 
   return (

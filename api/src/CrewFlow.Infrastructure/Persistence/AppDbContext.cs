@@ -3,7 +3,6 @@ using CrewFlow.Application.Common.Interfaces;
 using CrewFlow.Domain.Billing;
 using CrewFlow.Domain.Bookings;
 using CrewFlow.Domain.Cashflow;
-using CrewFlow.Domain.Cms;
 using CrewFlow.Domain.Identity;
 using CrewFlow.Domain.Instructors;
 using CrewFlow.Domain.Members;
@@ -38,14 +37,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     public DbSet<ProcessedStripeEvent> ProcessedStripeEvents => Set<ProcessedStripeEvent>();
 
     public DbSet<Activity> Activities => Set<Activity>();
+    public DbSet<ClassType> ClassTypes => Set<ClassType>();
     public DbSet<ClassSchedule> ClassSchedules => Set<ClassSchedule>();
     public DbSet<ClassOccurrence> ClassOccurrences => Set<ClassOccurrence>();
 
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<ClassReview> ClassReviews => Set<ClassReview>();
-
-    public DbSet<Page> Pages => Set<Page>();
-    public DbSet<PageSection> PageSections => Set<PageSection>();
 
     public async Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {

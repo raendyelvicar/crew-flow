@@ -20,13 +20,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const links: NavLink[] = [];
   if (isOperational) {
-    links.push({ href: "/admin/members", label: "Members" }, { href: "/admin/schedule", label: "Schedule" });
+    links.push(
+      { href: "/admin/members", label: "Members" },
+      { href: "/admin/schedule", label: "Schedule" },
+      { href: "/admin/coaches", label: "Coaches" },
+      { href: "/admin/class-genres", label: "Class Genres" },
+      { href: "/admin/class-types", label: "Class Types" }
+    );
   }
   if (isFinance) {
-    links.push({ href: "/admin/cashflow", label: "Cashflow" });
-  }
-  if (isAdmin) {
-    links.push({ href: "/admin/cms", label: "CMS" });
+    links.push({ href: "/admin/cashflow", label: "Cashflow" }, { href: "/admin/packages", label: "Packages" });
   }
 
   return (

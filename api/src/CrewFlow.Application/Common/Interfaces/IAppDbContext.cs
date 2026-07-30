@@ -1,7 +1,6 @@
 using CrewFlow.Domain.Billing;
 using CrewFlow.Domain.Bookings;
 using CrewFlow.Domain.Cashflow;
-using CrewFlow.Domain.Cms;
 using CrewFlow.Domain.Identity;
 using CrewFlow.Domain.Instructors;
 using CrewFlow.Domain.Members;
@@ -34,14 +33,12 @@ public interface IAppDbContext
     DbSet<ProcessedStripeEvent> ProcessedStripeEvents { get; }
 
     DbSet<Activity> Activities { get; }
+    DbSet<ClassType> ClassTypes { get; }
     DbSet<ClassSchedule> ClassSchedules { get; }
     DbSet<ClassOccurrence> ClassOccurrences { get; }
 
     DbSet<Booking> Bookings { get; }
     DbSet<ClassReview> ClassReviews { get; }
-
-    DbSet<Page> Pages { get; }
-    DbSet<PageSection> PageSections { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

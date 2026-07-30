@@ -24,3 +24,14 @@ public record UpsertInstructorProfileRequest(
     string? WebsiteUrl,
     bool IsActive,
     IReadOnlyList<Guid> DanceStyleIds);
+
+public record CreateInstructorRequest(
+    string FirstName,
+    string LastName,
+    string Email,
+    string? Bio,
+    string? AvatarUrl,
+    int? YearsExperience,
+    string? InstagramHandle,
+    string? WebsiteUrl,
+    IReadOnlyList<Guid> DanceStyleIds);

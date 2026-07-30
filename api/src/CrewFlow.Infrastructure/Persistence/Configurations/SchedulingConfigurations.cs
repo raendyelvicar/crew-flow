@@ -4,6 +4,30 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CrewFlow.Infrastructure.Persistence.Configurations;
 
+public class ClassTypeConfiguration : IEntityTypeConfiguration<ClassType>
+{
+    public void Configure(EntityTypeBuilder<ClassType> builder)
+    {
+        builder.HasIndex(t => t.Name).IsUnique();
+    }
+}
+
+public class ActivityConfiguration : IEntityTypeConfiguration<Activity>
+{
+    public void Configure(EntityTypeBuilder<Activity> builder)
+    {
+        builder.HasOne(a => a.ClassGenre)
+            .WithMany()
+            .HasForeignKey(a => a.ClassGenreId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(a => a.ClassType)
+            .WithMany(t => t.Activities)
+            .HasForeignKey(a => a.ClassTypeId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
 public class ClassScheduleConfiguration : IEntityTypeConfiguration<ClassSchedule>
 {
     public void Configure(EntityTypeBuilder<ClassSchedule> builder)

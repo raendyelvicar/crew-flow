@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SubscribeButton, BuyCreditsButton, CancelSubscriptionButton } from "@/components/membership-actions";
 import { apiClient, ApiError, publicGet } from "@/lib/api-client";
+import { formatMoney } from "@/lib/money";
 import type { CreditPack, CreditPackPurchase, MembershipPlan, Subscription } from "@/lib/types";
 
 async function safeGet<T>(promise: Promise<T>, fallback: T): Promise<T> {
@@ -11,10 +12,6 @@ async function safeGet<T>(promise: Promise<T>, fallback: T): Promise<T> {
     if (err instanceof ApiError && (err.status === 404 || err.status === 409)) return fallback;
     throw err;
   }
-}
-
-function formatPrice(cents: number, currency: string) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: currency.toUpperCase() }).format(cents / 100);
 }
 
 export default async function MembershipPage() {
@@ -71,7 +68,7 @@ export default async function MembershipPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-2xl font-bold">
-                  {formatPrice(plan.priceCents, plan.currency)}
+                  {formatMoney(plan.priceCents, plan.currency)}
                   <span className="text-sm font-normal text-muted-foreground">
                     /{plan.billingInterval === "Monthly" ? "mo" : "yr"}
                   </span>
@@ -93,7 +90,7 @@ export default async function MembershipPage() {
                 <CardDescription>{pack.creditCount} classes{pack.expiryDays ? ` - expires in ${pack.expiryDays} days` : ""}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-2xl font-bold">{formatPrice(pack.priceCents, pack.currency)}</p>
+                <p className="text-2xl font-bold">{formatMoney(pack.priceCents, pack.currency)}</p>
                 <BuyCreditsButton creditPackId={pack.id} />
               </CardContent>
             </Card>

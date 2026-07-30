@@ -7,6 +7,33 @@ using Microsoft.AspNetCore.Mvc;
 namespace CrewFlow.Api.Controllers;
 
 [ApiController]
+[Route("api/v1/class-types")]
+public class ClassTypesController : ControllerBase
+{
+    private readonly ClassTypeService _service;
+
+    public ClassTypesController(ClassTypeService service)
+    {
+        _service = service;
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<ActionResult<IReadOnlyList<ClassTypeResponse>>> List([FromQuery] bool activeOnly, CancellationToken ct)
+        => Ok(await _service.ListAsync(activeOnly, ct));
+
+    [HttpPost]
+    [Authorize(Policy = PolicyNames.OperationalAccess)]
+    public async Task<ActionResult<ClassTypeResponse>> Create(UpsertClassTypeRequest request, CancellationToken ct)
+        => Ok(await _service.CreateAsync(request, ct));
+
+    [HttpPut("{id:guid}")]
+    [Authorize(Policy = PolicyNames.OperationalAccess)]
+    public async Task<ActionResult<ClassTypeResponse>> Update(Guid id, UpsertClassTypeRequest request, CancellationToken ct)
+        => Ok(await _service.UpdateAsync(id, request, ct));
+}
+
+[ApiController]
 [Route("api/v1/activities")]
 public class ActivitiesController : ControllerBase
 {
@@ -53,6 +80,11 @@ public class ClassSchedulesController : ControllerBase
     [Authorize(Policy = PolicyNames.OperationalAccess)]
     public async Task<ActionResult<ClassScheduleResponse>> Create(CreateClassScheduleRequest request, CancellationToken ct)
         => Ok(await _service.CreateClassScheduleAsync(request, ct));
+
+    [HttpPut("{id:guid}")]
+    [Authorize(Policy = PolicyNames.OperationalAccess)]
+    public async Task<ActionResult<ClassScheduleResponse>> Update(Guid id, UpdateClassScheduleRequest request, CancellationToken ct)
+        => Ok(await _service.UpdateClassScheduleAsync(id, request, ct));
 
     [HttpPost("{id:guid}/generate-occurrences")]
     [Authorize(Policy = PolicyNames.OperationalAccess)]

@@ -1,17 +1,58 @@
 using CrewFlow.Application.Common.Exceptions;
 using CrewFlow.Application.Common.Interfaces;
+using CrewFlow.Domain.Identity;
 using CrewFlow.Domain.Instructors;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrewFlow.Application.Instructors;
 
 public class InstructorService
 {
-    private readonly IAppDbContext _db;
+    // Default password for coach accounts created via the admin UI - coaches are staff
+    // records first and foremost; whether they ever log in is secondary for this scaffold.
+    private const string DefaultCoachPassword = "ChangeMe123!";
 
-    public InstructorService(IAppDbContext db)
+    private readonly IAppDbContext _db;
+    private readonly UserManager<ApplicationUser> _userManager;
+
+    public InstructorService(IAppDbContext db, UserManager<ApplicationUser> userManager)
     {
         _db = db;
+        _userManager = userManager;
+    }
+
+    public async Task<InstructorProfileResponse> CreateAsync(CreateInstructorRequest request, CancellationToken ct = default)
+    {
+        var existing = await _userManager.FindByEmailAsync(request.Email);
+        if (existing is not null)
+        {
+            throw new ConflictException("An account with this email already exists.");
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = request.Email,
+            Email = request.Email,
+            EmailConfirmed = true,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+        };
+
+        var createResult = await _userManager.CreateAsync(user, DefaultCoachPassword);
+        if (!createResult.Succeeded)
+        {
+            throw new ValidationAppException(createResult.Errors.Select(e => e.Description));
+        }
+
+        if (!await _userManager.IsInRoleAsync(user, RoleNames.Operational))
+        {
+            await _userManager.AddToRoleAsync(user, RoleNames.Operational);
+        }
+
+        return await UpsertAsync(new UpsertInstructorProfileRequest(
+            user.Id, request.Bio, request.AvatarUrl, request.YearsExperience, request.InstagramHandle,
+            request.WebsiteUrl, true, request.DanceStyleIds), ct);
     }
 
     public async Task<IReadOnlyList<InstructorProfileResponse>> ListAsync(bool activeOnly, CancellationToken ct = default)

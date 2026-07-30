@@ -1,22 +1,40 @@
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { CreateActivityDialog } from "@/components/create-activity-dialog";
+import { buttonVariants } from "@/components/ui/button";
+import { ActivityDialog } from "@/components/create-activity-dialog";
 import { CreateClassScheduleDialog } from "@/components/create-class-schedule-dialog";
+import { ScheduleCalendar } from "@/components/schedule-calendar";
 import { apiClient } from "@/lib/api-client";
-import type { Activity, ClassOccurrence, ClassSchedule } from "@/lib/types";
+import type { Activity, ClassSchedule, ClassOccurrence, ClassType, DanceStyle } from "@/lib/types";
 
-export default async function SchedulePage() {
-  const from = new Date();
-  const to = new Date();
-  to.setDate(to.getDate() + 14);
+function startOfWeek(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day; // Monday as the first day
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
 
-  const [activities, schedules, occurrences] = await Promise.all([
+export default async function SchedulePage({ searchParams }: PageProps<"/admin/schedule">) {
+  const params = await searchParams;
+  const weekParam = typeof params.week === "string" ? params.week : undefined;
+  const weekStart = startOfWeek(weekParam ? new Date(weekParam) : new Date());
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 7);
+
+  const prevWeek = new Date(weekStart);
+  prevWeek.setDate(prevWeek.getDate() - 7);
+  const nextWeek = new Date(weekStart);
+  nextWeek.setDate(nextWeek.getDate() + 7);
+
+  const [activities, schedules, occurrences, danceStyles, classTypes] = await Promise.all([
     apiClient.get<Activity[]>("/api/v1/activities?activeOnly=true"),
     apiClient.get<ClassSchedule[]>("/api/v1/class-schedules"),
     apiClient.get<ClassOccurrence[]>(
-      `/api/v1/class-occurrences?fromUtc=${from.toISOString()}&toUtc=${to.toISOString()}`
+      `/api/v1/class-occurrences?fromUtc=${weekStart.toISOString()}&toUtc=${weekEnd.toISOString()}`
     ),
+    apiClient.get<DanceStyle[]>("/api/v1/dance-styles?activeOnly=true"),
+    apiClient.get<ClassType[]>("/api/v1/class-types?activeOnly=true"),
   ]);
 
   return (
@@ -24,11 +42,50 @@ export default async function SchedulePage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Schedule</h1>
-          <p className="text-sm text-muted-foreground">Activities, recurring classes, and the next 2 weeks.</p>
+          <p className="text-sm text-muted-foreground">Weekly calendar, activities, and recurring classes.</p>
         </div>
         <div className="flex gap-2">
-          <CreateActivityDialog />
+          <ActivityDialog danceStyles={danceStyles} classTypes={classTypes} />
           <CreateClassScheduleDialog activities={activities} />
+        </div>
+      </div>
+
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <Link
+            href={`/admin/schedule?week=${prevWeek.toISOString().slice(0, 10)}`}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            &larr; Previous
+          </Link>
+          <p className="text-sm font-medium">
+            {weekStart.toLocaleDateString(undefined, { month: "short", day: "numeric" })} -{" "}
+            {new Date(weekEnd.getTime() - 86400000).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+          </p>
+          <Link
+            href={`/admin/schedule?week=${nextWeek.toISOString().slice(0, 10)}`}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            Next &rarr;
+          </Link>
+        </div>
+        <ScheduleCalendar weekStart={weekStart} occurrences={occurrences} />
+      </div>
+
+      <div>
+        <h2 className="mb-3 text-lg font-semibold">Activities</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {activities.map((activity) => (
+            <div key={activity.id} className="flex items-center justify-between rounded-lg border p-4 text-sm">
+              <div>
+                <p className="font-medium">{activity.name}</p>
+                <p className="text-muted-foreground">
+                  {activity.classGenreName} - {activity.classTypeName}
+                </p>
+              </div>
+              <ActivityDialog activity={activity} danceStyles={danceStyles} classTypes={classTypes} />
+            </div>
+          ))}
         </div>
       </div>
 
@@ -39,50 +96,17 @@ export default async function SchedulePage() {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {schedules.map((schedule) => (
-              <Card key={schedule.id}>
-                <CardContent className="pt-6 text-sm">
+              <div key={schedule.id} className="flex items-center justify-between rounded-lg border p-4 text-sm">
+                <div>
                   <p className="font-medium">{schedule.activityName}</p>
                   <p className="text-muted-foreground">
                     {schedule.dayOfWeek}s at {schedule.startTimeLocal.slice(0, 5)} ({schedule.durationMinutes} min)
                   </p>
                   <p className="text-muted-foreground">Instructor: {schedule.instructorName}</p>
                   <p className="text-muted-foreground">Capacity: {schedule.capacity}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div>
-        <h2 className="mb-3 text-lg font-semibold">Upcoming occurrences</h2>
-        {occurrences.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nothing scheduled in the next 2 weeks.</p>
-        ) : (
-          <div className="space-y-2">
-            {occurrences.map((occurrence) => (
-              <Link
-                key={occurrence.id}
-                href={`/admin/schedule/occurrences/${occurrence.id}`}
-                className="flex items-center justify-between rounded-lg border p-4 text-sm hover:bg-accent/50"
-              >
-                <div>
-                  <p className="font-medium">{occurrence.activityName}</p>
-                  <p className="text-muted-foreground">
-                    {new Date(occurrence.startAtUtc).toLocaleString(undefined, {
-                      weekday: "short",
-                      month: "short",
-                      day: "numeric",
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })}{" "}
-                    with {occurrence.instructorName}
-                  </p>
                 </div>
-                <Badge variant={occurrence.bookedCount >= occurrence.capacity ? "secondary" : "default"}>
-                  {occurrence.bookedCount}/{occurrence.capacity}
-                </Badge>
-              </Link>
+                <CreateClassScheduleDialog activities={activities} schedule={schedule} />
+              </div>
             ))}
           </div>
         )}

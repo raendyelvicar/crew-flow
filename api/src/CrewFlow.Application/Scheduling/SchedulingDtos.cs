@@ -3,10 +3,19 @@ using CrewFlow.Domain.Scheduling;
 namespace CrewFlow.Application.Scheduling;
 
 public record ActivityResponse(
-    Guid Id, string Name, string? Description, string Category, int DefaultCapacity, int DefaultDurationMinutes, bool IsActive);
+    Guid Id,
+    string Name,
+    string? Description,
+    Guid ClassGenreId,
+    string ClassGenreName,
+    Guid ClassTypeId,
+    string ClassTypeName,
+    int DefaultCapacity,
+    int DefaultDurationMinutes,
+    bool IsActive);
 
 public record UpsertActivityRequest(
-    string Name, string? Description, string Category, int DefaultCapacity, int DefaultDurationMinutes, bool IsActive);
+    string Name, string? Description, Guid ClassGenreId, Guid ClassTypeId, int DefaultCapacity, int DefaultDurationMinutes, bool IsActive);
 
 public record ClassScheduleResponse(
     Guid Id,
@@ -50,3 +59,14 @@ public record ClassOccurrenceResponse(
     string? CancellationReason);
 
 public record UpdateOccurrenceRequest(int? Capacity, Guid? InstructorUserId, OccurrenceStatus? Status, string? CancellationReason);
+
+public record UpdateClassScheduleRequest(
+    Guid InstructorUserId,
+    DayOfWeek DayOfWeek,
+    TimeOnly StartTimeLocal,
+    int DurationMinutes,
+    int Capacity,
+    string Timezone,
+    DateOnly EffectiveFromDate,
+    DateOnly? EffectiveToDate,
+    bool IsActive);

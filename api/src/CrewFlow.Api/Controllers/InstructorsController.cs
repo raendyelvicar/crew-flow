@@ -26,6 +26,11 @@ public class InstructorsController : ControllerBase
     public async Task<ActionResult<InstructorProfileResponse>> GetById(Guid id, CancellationToken ct)
         => Ok(await _service.GetByIdAsync(id, ct));
 
+    [HttpPost]
+    [Authorize(Policy = PolicyNames.OperationalAccess)]
+    public async Task<ActionResult<InstructorProfileResponse>> Create(CreateInstructorRequest request, CancellationToken ct)
+        => Ok(await _service.CreateAsync(request, ct));
+
     [HttpPut]
     [Authorize(Policy = PolicyNames.OperationalAccess)]
     public async Task<ActionResult<InstructorProfileResponse>> Upsert(UpsertInstructorProfileRequest request, CancellationToken ct)

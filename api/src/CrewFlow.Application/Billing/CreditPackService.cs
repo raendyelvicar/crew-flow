@@ -50,6 +50,28 @@ public class CreditPackService
         return Map(pack);
     }
 
+    public async Task<CreditPackResponse> UpdateAsync(Guid id, UpsertCreditPackRequest request, CancellationToken ct = default)
+    {
+        var pack = await _db.CreditPacks.FirstOrDefaultAsync(p => p.Id == id, ct)
+            ?? throw new NotFoundException(nameof(CreditPack), id);
+
+        var (productId, priceId) = await _stripe.UpsertOneTimePriceAsync(
+            request.Name, request.Description, request.PriceCents, request.Currency, pack.StripeProductId, ct);
+
+        pack.Name = request.Name;
+        pack.Description = request.Description;
+        pack.CreditCount = request.CreditCount;
+        pack.PriceCents = request.PriceCents;
+        pack.Currency = request.Currency;
+        pack.StripeProductId = productId;
+        pack.StripePriceId = priceId;
+        pack.ExpiryDays = request.ExpiryDays;
+        pack.IsActive = request.IsActive;
+
+        await _db.SaveChangesAsync(ct);
+        return Map(pack);
+    }
+
     public async Task<CheckoutSessionResponse> StartCreditPackCheckoutAsync(CreateCreditPackCheckoutRequest request, CancellationToken ct = default)
     {
         var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == request.MemberId, ct)

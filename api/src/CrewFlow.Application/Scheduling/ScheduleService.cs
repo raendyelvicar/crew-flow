@@ -19,7 +19,10 @@ public class ScheduleService
 
     public async Task<IReadOnlyList<ActivityResponse>> ListActivitiesAsync(bool activeOnly, CancellationToken ct = default)
     {
-        var query = _db.Activities.AsNoTracking().AsQueryable();
+        var query = _db.Activities.AsNoTracking()
+            .Include(a => a.ClassGenre)
+            .Include(a => a.ClassType)
+            .AsQueryable();
         if (activeOnly) query = query.Where(a => a.IsActive);
 
         var activities = await query.OrderBy(a => a.Name).ToListAsync(ct);
@@ -33,14 +36,15 @@ public class ScheduleService
             Id = Guid.NewGuid(),
             Name = request.Name,
             Description = request.Description,
-            Category = request.Category,
+            ClassGenreId = request.ClassGenreId,
+            ClassTypeId = request.ClassTypeId,
             DefaultCapacity = request.DefaultCapacity,
             DefaultDurationMinutes = request.DefaultDurationMinutes,
             IsActive = request.IsActive,
         };
         _db.Activities.Add(activity);
         await _db.SaveChangesAsync(ct);
-        return MapActivity(activity);
+        return await GetActivityAsync(activity.Id, ct);
     }
 
     public async Task<ActivityResponse> UpdateActivityAsync(Guid id, UpsertActivityRequest request, CancellationToken ct = default)
@@ -50,12 +54,21 @@ public class ScheduleService
 
         activity.Name = request.Name;
         activity.Description = request.Description;
-        activity.Category = request.Category;
+        activity.ClassGenreId = request.ClassGenreId;
+        activity.ClassTypeId = request.ClassTypeId;
         activity.DefaultCapacity = request.DefaultCapacity;
         activity.DefaultDurationMinutes = request.DefaultDurationMinutes;
         activity.IsActive = request.IsActive;
 
         await _db.SaveChangesAsync(ct);
+        return await GetActivityAsync(activity.Id, ct);
+    }
+
+    private async Task<ActivityResponse> GetActivityAsync(Guid id, CancellationToken ct)
+    {
+        var activity = await _db.Activities.AsNoTracking()
+            .Include(a => a.ClassGenre).Include(a => a.ClassType)
+            .FirstAsync(a => a.Id == id, ct);
         return MapActivity(activity);
     }
 
@@ -97,6 +110,30 @@ public class ScheduleService
         var reloaded = await _db.ClassSchedules.AsNoTracking()
             .Include(cs => cs.Activity).Include(cs => cs.InstructorUser)
             .FirstAsync(cs => cs.Id == schedule.Id, ct);
+
+        return MapSchedule(reloaded);
+    }
+
+    public async Task<ClassScheduleResponse> UpdateClassScheduleAsync(Guid id, UpdateClassScheduleRequest request, CancellationToken ct = default)
+    {
+        var schedule = await _db.ClassSchedules.FirstOrDefaultAsync(cs => cs.Id == id, ct)
+            ?? throw new NotFoundException(nameof(ClassSchedule), id);
+
+        schedule.InstructorUserId = request.InstructorUserId;
+        schedule.DayOfWeek = request.DayOfWeek;
+        schedule.StartTimeLocal = request.StartTimeLocal;
+        schedule.DurationMinutes = request.DurationMinutes;
+        schedule.Capacity = request.Capacity;
+        schedule.Timezone = request.Timezone;
+        schedule.EffectiveFromDate = request.EffectiveFromDate;
+        schedule.EffectiveToDate = request.EffectiveToDate;
+        schedule.IsActive = request.IsActive;
+
+        await _db.SaveChangesAsync(ct);
+
+        var reloaded = await _db.ClassSchedules.AsNoTracking()
+            .Include(cs => cs.Activity).Include(cs => cs.InstructorUser)
+            .FirstAsync(cs => cs.Id == id, ct);
 
         return MapSchedule(reloaded);
     }
@@ -202,7 +239,16 @@ public class ScheduleService
     }
 
     private static ActivityResponse MapActivity(Activity a) => new(
-        a.Id, a.Name, a.Description, a.Category, a.DefaultCapacity, a.DefaultDurationMinutes, a.IsActive);
+        a.Id,
+        a.Name,
+        a.Description,
+        a.ClassGenreId,
+        a.ClassGenre?.Name ?? string.Empty,
+        a.ClassTypeId,
+        a.ClassType?.Name ?? string.Empty,
+        a.DefaultCapacity,
+        a.DefaultDurationMinutes,
+        a.IsActive);
 
     private static ClassScheduleResponse MapSchedule(ClassSchedule cs) => new(
         cs.Id,

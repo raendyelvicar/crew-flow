@@ -97,6 +97,11 @@ public class CreditPacksController : ControllerBase
     public async Task<ActionResult<CreditPackResponse>> Create(UpsertCreditPackRequest request, CancellationToken ct)
         => Ok(await _service.CreateAsync(request, ct));
 
+    [HttpPut("{id:guid}")]
+    [Authorize(Policy = PolicyNames.FinanceAccess)]
+    public async Task<ActionResult<CreditPackResponse>> Update(Guid id, UpsertCreditPackRequest request, CancellationToken ct)
+        => Ok(await _service.UpdateAsync(id, request, ct));
+
     [HttpPost("checkout")]
     [Authorize(Policy = PolicyNames.MemberOnly)]
     public async Task<ActionResult<CheckoutSessionResponse>> StartCheckout(CreateCreditPackCheckoutRequest request, CancellationToken ct)

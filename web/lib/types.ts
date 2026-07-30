@@ -44,11 +44,21 @@ export type DanceStyle = {
   isActive: boolean;
 };
 
+export type ClassType = {
+  id: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+};
+
 export type Activity = {
   id: string;
   name: string;
   description?: string;
-  category: string;
+  classGenreId: string;
+  classGenreName: string;
+  classTypeId: string;
+  classTypeName: string;
   defaultCapacity: number;
   defaultDurationMinutes: number;
   isActive: boolean;
@@ -200,24 +210,23 @@ export type CashflowSummary = {
   byCategory: Record<string, number>;
 };
 
-export type SectionType = "Hero" | "RichText" | "ImageGallery" | "CtaBanner" | "Testimonials" | "PricingTable";
-
-export type PageSection = {
-  id: string;
-  sortOrder: number;
-  sectionType: SectionType;
-  contentJson: string;
-  isVisible: boolean;
+export type InstructorDanceStyle = {
+  danceStyleId: string;
+  danceStyleName: string;
 };
 
-export type CmsPage = {
+export type Instructor = {
   id: string;
-  slug: string;
-  title: string;
-  isPublished: boolean;
-  publishedAtUtc?: string;
-  updatedAtUtc: string;
-  sections: PageSection[];
+  userId: string;
+  firstName: string;
+  lastName: string;
+  bio?: string;
+  avatarUrl?: string;
+  yearsExperience?: number;
+  instagramHandle?: string;
+  websiteUrl?: string;
+  isActive: boolean;
+  danceStyles: InstructorDanceStyle[];
 };
 
 export type ApiProblem = {
