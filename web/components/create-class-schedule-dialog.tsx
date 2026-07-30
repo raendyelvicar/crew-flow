@@ -9,16 +9,24 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { createClassSchedule, updateClassSchedule, type ClassScheduleFormInput } from "@/app/admin/schedule/actions";
-import type { Activity, ClassSchedule } from "@/lib/types";
+import type { Activity, ClassSchedule, Instructor } from "@/lib/types";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-export function CreateClassScheduleDialog({ activities, schedule }: { activities: Activity[]; schedule?: ClassSchedule }) {
+export function CreateClassScheduleDialog({
+  activities,
+  instructors,
+  schedule,
+}: {
+  activities: Activity[];
+  instructors: Instructor[];
+  schedule?: ClassSchedule;
+}) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [form, setForm] = useState<ClassScheduleFormInput>({
     activityId: schedule?.activityId ?? activities[0]?.id ?? "",
-    instructorUserId: schedule?.instructorUserId ?? "",
+    instructorUserId: schedule?.instructorUserId ?? instructors[0]?.userId ?? "",
     dayOfWeek: schedule ? DAYS.indexOf(schedule.dayOfWeek).toString() : "1",
     startTimeLocal: schedule?.startTimeLocal.slice(0, 5) ?? "18:00",
     durationMinutes: schedule?.durationMinutes.toString() ?? "60",
@@ -46,7 +54,15 @@ export function CreateClassScheduleDialog({ activities, schedule }: { activities
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button disabled={!schedule && activities.length === 0} variant={schedule ? "outline" : "default"} size={schedule ? "sm" : "default"} />}>
+      <DialogTrigger
+        render={
+          <Button
+            disabled={!schedule && (activities.length === 0 || instructors.length === 0)}
+            variant={schedule ? "outline" : "default"}
+            size={schedule ? "sm" : "default"}
+          />
+        }
+      >
         {schedule ? "Edit" : "Add weekly class"}
       </DialogTrigger>
       <DialogContent>
@@ -59,7 +75,7 @@ export function CreateClassScheduleDialog({ activities, schedule }: { activities
               <Label>Activity</Label>
               <Select value={form.activityId} onValueChange={(v) => v && setForm({ ...form, activityId: v })}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>{(id: string) => activities.find((a) => a.id === id)?.name}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {activities.map((activity) => (
@@ -72,21 +88,34 @@ export function CreateClassScheduleDialog({ activities, schedule }: { activities
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="instructorUserId">Instructor user ID</Label>
-            <Input
-              id="instructorUserId"
-              placeholder="Staff account's user ID"
-              required
+            <Label>Instructor</Label>
+            <Select
               value={form.instructorUserId}
-              onChange={(e) => setForm({ ...form, instructorUserId: e.target.value })}
-            />
+              onValueChange={(v) => v && setForm({ ...form, instructorUserId: v })}
+            >
+              <SelectTrigger>
+                <SelectValue>
+                  {(id: string) => {
+                    const instructor = instructors.find((i) => i.userId === id);
+                    return instructor ? `${instructor.firstName} ${instructor.lastName}` : undefined;
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {instructors.map((instructor) => (
+                  <SelectItem key={instructor.userId} value={instructor.userId}>
+                    {instructor.firstName} {instructor.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Day of week</Label>
               <Select value={form.dayOfWeek} onValueChange={(v) => v && setForm({ ...form, dayOfWeek: v })}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>{(index: string) => DAYS[Number(index)]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {DAYS.map((day, i) => (

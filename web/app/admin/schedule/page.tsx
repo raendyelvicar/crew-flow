@@ -4,7 +4,7 @@ import { ActivityDialog } from "@/components/create-activity-dialog";
 import { CreateClassScheduleDialog } from "@/components/create-class-schedule-dialog";
 import { ScheduleCalendar } from "@/components/schedule-calendar";
 import { apiClient } from "@/lib/api-client";
-import type { Activity, ClassSchedule, ClassOccurrence, ClassType, DanceStyle } from "@/lib/types";
+import type { Activity, ClassSchedule, ClassOccurrence, ClassType, DanceStyle, Instructor } from "@/lib/types";
 
 function startOfWeek(date: Date): Date {
   const d = new Date(date);
@@ -27,7 +27,7 @@ export default async function SchedulePage({ searchParams }: PageProps<"/admin/s
   const nextWeek = new Date(weekStart);
   nextWeek.setDate(nextWeek.getDate() + 7);
 
-  const [activities, schedules, occurrences, danceStyles, classTypes] = await Promise.all([
+  const [activities, schedules, occurrences, danceStyles, classTypes, instructors] = await Promise.all([
     apiClient.get<Activity[]>("/api/v1/activities?activeOnly=true"),
     apiClient.get<ClassSchedule[]>("/api/v1/class-schedules"),
     apiClient.get<ClassOccurrence[]>(
@@ -35,6 +35,7 @@ export default async function SchedulePage({ searchParams }: PageProps<"/admin/s
     ),
     apiClient.get<DanceStyle[]>("/api/v1/dance-styles?activeOnly=true"),
     apiClient.get<ClassType[]>("/api/v1/class-types?activeOnly=true"),
+    apiClient.get<Instructor[]>("/api/v1/instructors?activeOnly=true"),
   ]);
 
   return (
@@ -46,7 +47,7 @@ export default async function SchedulePage({ searchParams }: PageProps<"/admin/s
         </div>
         <div className="flex gap-2">
           <ActivityDialog danceStyles={danceStyles} classTypes={classTypes} />
-          <CreateClassScheduleDialog activities={activities} />
+          <CreateClassScheduleDialog activities={activities} instructors={instructors} />
         </div>
       </div>
 
@@ -105,7 +106,7 @@ export default async function SchedulePage({ searchParams }: PageProps<"/admin/s
                   <p className="text-muted-foreground">Instructor: {schedule.instructorName}</p>
                   <p className="text-muted-foreground">Capacity: {schedule.capacity}</p>
                 </div>
-                <CreateClassScheduleDialog activities={activities} schedule={schedule} />
+                <CreateClassScheduleDialog activities={activities} instructors={instructors} schedule={schedule} />
               </div>
             ))}
           </div>

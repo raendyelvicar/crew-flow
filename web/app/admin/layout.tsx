@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
+import { CalendarDays, DollarSign, Music2, Package, Tag, UserCog, Users } from "lucide-react";
 import { auth } from "@/lib/auth";
-import { AppNav, type NavLink } from "@/components/nav";
+import { AdminSidebar, type AdminNavSection } from "@/components/admin-sidebar";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -18,26 +19,28 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/dashboard");
   }
 
-  const links: NavLink[] = [];
+  const sections: AdminNavSection[] = [];
   if (isOperational) {
-    links.push(
-      { href: "/admin/members", label: "Members" },
-      { href: "/admin/schedule", label: "Schedule" },
-      { href: "/admin/coaches", label: "Coaches" },
-      { href: "/admin/class-genres", label: "Class Genres" },
-      { href: "/admin/class-types", label: "Class Types" }
-    );
+    sections.push({
+      label: "Operations",
+      items: [
+        { href: "/admin/members", label: "Members", icon: <Users /> },
+        { href: "/admin/schedule", label: "Schedule", icon: <CalendarDays /> },
+        { href: "/admin/coaches", label: "Coaches", icon: <UserCog /> },
+        { href: "/admin/class-genres", label: "Class Genres", icon: <Music2 /> },
+        { href: "/admin/class-types", label: "Class Types", icon: <Tag /> },
+      ],
+    });
   }
   if (isFinance) {
-    links.push({ href: "/admin/cashflow", label: "Cashflow" }, { href: "/admin/packages", label: "Packages" });
+    sections.push({
+      label: "Finance",
+      items: [
+        { href: "/admin/cashflow", label: "Cashflow", icon: <DollarSign /> },
+        { href: "/admin/packages", label: "Packages", icon: <Package /> },
+      ],
+    });
   }
 
-  return (
-    <div className="flex min-h-screen flex-col">
-      <AppNav brandHref="/admin" links={links} />
-      <main className="flex-1 px-4 py-6 sm:py-8">
-        <div className="mx-auto max-w-6xl">{children}</div>
-      </main>
-    </div>
-  );
+  return <AdminSidebar sections={sections}>{children}</AdminSidebar>;
 }

@@ -64,7 +64,7 @@ export function ActivityDialog({
               <Label>Class genre</Label>
               <Select value={form.classGenreId} onValueChange={(v) => v && setForm({ ...form, classGenreId: v })}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>{(id: string) => danceStyles.find((s) => s.id === id)?.name}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {danceStyles.map((style) => (
@@ -79,7 +79,7 @@ export function ActivityDialog({
               <Label>Class type</Label>
               <Select value={form.classTypeId} onValueChange={(v) => v && setForm({ ...form, classTypeId: v })}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>{(id: string) => classTypes.find((t) => t.id === id)?.name}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {classTypes.map((type) => (

@@ -72,6 +72,8 @@ export function PlanDialog({ plan }: { plan?: MembershipPlan }) {
                   <SelectItem value="Annual">Annual</SelectItem>
                 </SelectContent>
               </Select>
+              {/* Values equal their labels here, so the default SelectValue rendering (which
+                  shows the raw value, not a resolved item label) happens to be correct. */}
             </div>
             <div className="space-y-2">
               <Label htmlFor="price">Price (IDR)</Label>

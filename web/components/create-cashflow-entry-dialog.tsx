@@ -9,6 +9,20 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createCashflowEntry, type CreateCashflowEntryInput } from "@/app/admin/cashflow/actions";
 
+const SOURCE_LABELS: Record<CreateCashflowEntryInput["source"], string> = {
+  ManualCash: "Cash",
+  ManualCard: "Card",
+  Other: "Other",
+};
+
+const CATEGORY_LABELS: Record<CreateCashflowEntryInput["category"], string> = {
+  Membership: "Membership",
+  CreditPack: "Credit pack",
+  DropIn: "Drop-in",
+  Merchandise: "Merchandise",
+  Other: "Other",
+};
+
 export function CreateCashflowEntryDialog() {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -64,7 +78,7 @@ export function CreateCashflowEntryDialog() {
                 onValueChange={(v) => v && setSource(v as CreateCashflowEntryInput["source"])}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>{(value: string) => SOURCE_LABELS[value as CreateCashflowEntryInput["source"]]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ManualCash">Cash</SelectItem>
@@ -80,7 +94,7 @@ export function CreateCashflowEntryDialog() {
                 onValueChange={(v) => v && setCategory(v as CreateCashflowEntryInput["category"])}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>{(value: string) => CATEGORY_LABELS[value as CreateCashflowEntryInput["category"]]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Membership">Membership</SelectItem>
