@@ -39,9 +39,20 @@ public class BookingsController : ControllerBase
     }
 
     [HttpPost("bookings/{id:guid}/attendance")]
-    [Authorize(Policy = PolicyNames.OperationalAccess)]
+    [Authorize(Policy = PolicyNames.OperationalOrCoach)]
     public async Task<ActionResult<BookingResponse>> MarkAttendance(Guid id, MarkAttendanceRequest request, CancellationToken ct)
-        => Ok(await _bookingService.MarkAttendanceAsync(id, request, ct));
+    {
+        if (!User.IsInRole(CrewFlow.Domain.Identity.RoleNames.Admin) && !User.IsInRole(CrewFlow.Domain.Identity.RoleNames.Operational))
+        {
+            var instructorId = await _bookingService.GetOccurrenceInstructorIdForBookingAsync(id, ct);
+            if (instructorId != this.GetUserId())
+            {
+                throw new CrewFlow.Application.Common.Exceptions.ForbiddenException("You can only check in members for classes you instruct.");
+            }
+        }
+
+        return Ok(await _bookingService.MarkAttendanceAsync(id, request, ct));
+    }
 
     [HttpPost("class-reviews")]
     [Authorize(Policy = PolicyNames.MemberOnly)]

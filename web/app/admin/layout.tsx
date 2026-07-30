@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { CalendarDays, DollarSign, Music2, Package, Tag, UserCog, Users } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { AdminSidebar, type AdminNavSection } from "@/components/admin-sidebar";
+import { resolveHomeRoute } from "@/lib/roles";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -16,7 +17,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const isOperational = isAdmin || roles.includes("Operational");
 
   if (!isFinance && !isOperational) {
-    redirect("/dashboard");
+    redirect(resolveHomeRoute(roles));
   }
 
   const sections: AdminNavSection[] = [];

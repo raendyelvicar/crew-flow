@@ -205,7 +205,7 @@ public class ScheduleService
     // --- Occurrences ---
 
     public async Task<IReadOnlyList<ClassOccurrenceResponse>> ListOccurrencesAsync(
-        DateTime fromUtc, DateTime toUtc, Guid? activityId, CancellationToken ct = default)
+        DateTime fromUtc, DateTime toUtc, Guid? activityId, Guid? instructorUserId = null, CancellationToken ct = default)
     {
         var query = _db.ClassOccurrences.AsNoTracking()
             .Include(o => o.Activity)
@@ -218,8 +218,21 @@ public class ScheduleService
             query = query.Where(o => o.ActivityId == activityId);
         }
 
+        if (instructorUserId is not null)
+        {
+            query = query.Where(o => o.InstructorUserId == instructorUserId);
+        }
+
         var occurrences = await query.OrderBy(o => o.StartAtUtc).ToListAsync(ct);
         return occurrences.Select(MapOccurrence).ToList();
+    }
+
+    // Used to authorize a Coach's roster/attendance actions to only their own classes.
+    public async Task<Guid> GetOccurrenceInstructorIdAsync(Guid occurrenceId, CancellationToken ct = default)
+    {
+        var occurrence = await _db.ClassOccurrences.AsNoTracking().FirstOrDefaultAsync(o => o.Id == occurrenceId, ct)
+            ?? throw new NotFoundException(nameof(ClassOccurrence), occurrenceId);
+        return occurrence.InstructorUserId;
     }
 
     public async Task<ClassOccurrenceResponse> UpdateOccurrenceAsync(Guid occurrenceId, UpdateOccurrenceRequest request, CancellationToken ct = default)

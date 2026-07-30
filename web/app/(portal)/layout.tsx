@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { AppNav } from "@/components/nav";
+import { resolveHomeRoute } from "@/lib/roles";
 
 const links = [
   { href: "/dashboard", label: "Dashboard" },
@@ -17,7 +18,7 @@ export default async function PortalLayout({ children }: { children: React.React
   }
 
   if (!session.roles?.includes("Member")) {
-    redirect("/admin");
+    redirect(resolveHomeRoute(session.roles));
   }
 
   return (

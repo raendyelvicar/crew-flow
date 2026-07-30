@@ -54,6 +54,8 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(PolicyNames.AdminOnly, policy => policy.RequireRole(RoleNames.Admin));
     options.AddPolicy(PolicyNames.FinanceAccess, policy => policy.RequireRole(RoleNames.Admin, RoleNames.Finance));
     options.AddPolicy(PolicyNames.OperationalAccess, policy => policy.RequireRole(RoleNames.Admin, RoleNames.Operational));
+    options.AddPolicy(PolicyNames.CoachAccess, policy => policy.RequireRole(RoleNames.Admin, RoleNames.Coach));
+    options.AddPolicy(PolicyNames.OperationalOrCoach, policy => policy.RequireRole(RoleNames.Admin, RoleNames.Operational, RoleNames.Coach));
     options.AddPolicy(PolicyNames.AnyStaff, policy => policy.RequireRole(RoleNames.StaffRoles));
     options.AddPolicy(PolicyNames.MemberOnly, policy => policy.RequireRole(RoleNames.Member));
 });

@@ -153,6 +153,18 @@ public class BookingService
         return MapBooking(booking);
     }
 
+    // Used to authorize a Coach's attendance check-ins to only their own classes.
+    public async Task<Guid> GetOccurrenceInstructorIdForBookingAsync(Guid bookingId, CancellationToken ct = default)
+    {
+        var booking = await _db.Bookings.AsNoTracking()
+            .Include(b => b.ClassOccurrence)
+            .FirstOrDefaultAsync(b => b.Id == bookingId, ct)
+            ?? throw new NotFoundException(nameof(Booking), bookingId);
+
+        return booking.ClassOccurrence?.InstructorUserId
+            ?? throw new NotFoundException(nameof(ClassOccurrence), booking.ClassOccurrenceId);
+    }
+
     public async Task<IReadOnlyList<MyBookingResponse>> GetMemberBookingsAsync(Guid memberId, CancellationToken ct = default)
     {
         var bookings = await _db.Bookings.AsNoTracking()

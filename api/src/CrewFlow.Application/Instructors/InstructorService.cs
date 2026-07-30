@@ -45,9 +45,9 @@ public class InstructorService
             throw new ValidationAppException(createResult.Errors.Select(e => e.Description));
         }
 
-        if (!await _userManager.IsInRoleAsync(user, RoleNames.Operational))
+        if (!await _userManager.IsInRoleAsync(user, RoleNames.Coach))
         {
-            await _userManager.AddToRoleAsync(user, RoleNames.Operational);
+            await _userManager.AddToRoleAsync(user, RoleNames.Coach);
         }
 
         return await UpsertAsync(new UpsertInstructorProfileRequest(

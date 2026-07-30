@@ -136,7 +136,7 @@ public static class StudioDemoSeeder
                     LastName = coach.LastName,
                 };
                 await userManager.CreateAsync(user, DemoPassword);
-                await userManager.AddToRoleAsync(user, CrewFlow.Domain.Identity.RoleNames.Operational);
+                await userManager.AddToRoleAsync(user, CrewFlow.Domain.Identity.RoleNames.Coach);
             }
 
             coachUserIdByFirstName[coach.FirstName] = user.Id;

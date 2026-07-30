@@ -4,16 +4,16 @@ import { apiClient } from "@/lib/api-client";
 import type { RosterEntry } from "@/lib/types";
 import { markAttendance } from "./actions";
 
-export default async function OccurrenceRosterPage({ params }: PageProps<"/admin/schedule/occurrences/[id]">) {
-  const { id } = await params;
-  const roster = await apiClient.get<RosterEntry[]>(`/api/v1/class-occurrences/${id}/roster`);
-  const checkIn = markAttendance.bind(null, id, "Attended");
-  const markAttendanceAction = markAttendance.bind(null, id);
+export default async function CoachClassRosterPage({ params }: PageProps<"/coach/classes/[occurrenceId]">) {
+  const { occurrenceId } = await params;
+  const roster = await apiClient.get<RosterEntry[]>(`/api/v1/class-occurrences/${occurrenceId}/roster`);
+  const checkIn = markAttendance.bind(null, occurrenceId, "Attended");
+  const markAttendanceAction = markAttendance.bind(null, occurrenceId);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Roster</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Class roster</h1>
         <p className="text-sm text-muted-foreground">{roster.length} booking(s)</p>
       </div>
 

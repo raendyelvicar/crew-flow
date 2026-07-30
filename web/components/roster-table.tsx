@@ -5,15 +5,16 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { markAttendance } from "@/app/admin/schedule/occurrences/[id]/actions";
 import type { RosterEntry } from "@/lib/types";
 
-export function RosterTable({ occurrenceId, roster }: { occurrenceId: string; roster: RosterEntry[] }) {
+type MarkAttendanceAction = (status: "Attended" | "NoShow", bookingId: string) => Promise<{ success: boolean; message: string }>;
+
+export function RosterTable({ roster, onMarkAttendance }: { roster: RosterEntry[]; onMarkAttendance: MarkAttendanceAction }) {
   const [isPending, startTransition] = useTransition();
 
   function handleMark(bookingId: string, status: "Attended" | "NoShow") {
     startTransition(async () => {
-      const result = await markAttendance(bookingId, occurrenceId, status);
+      const result = await onMarkAttendance(status, bookingId);
       if (result.success) toast.success(result.message);
       else toast.error(result.message);
     });

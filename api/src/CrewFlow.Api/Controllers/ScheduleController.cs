@@ -1,4 +1,6 @@
+using CrewFlow.Api.Common;
 using CrewFlow.Application.Bookings;
+using CrewFlow.Application.Common.Exceptions;
 using CrewFlow.Application.Common.Security;
 using CrewFlow.Application.Scheduling;
 using Microsoft.AspNetCore.Authorization;
@@ -112,7 +114,13 @@ public class ClassOccurrencesController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<IReadOnlyList<ClassOccurrenceResponse>>> List(
         [FromQuery] DateTime fromUtc, [FromQuery] DateTime toUtc, [FromQuery] Guid? activityId, CancellationToken ct)
-        => Ok(await _scheduleService.ListOccurrencesAsync(fromUtc, toUtc, activityId, ct));
+        => Ok(await _scheduleService.ListOccurrencesAsync(fromUtc, toUtc, activityId, ct: ct));
+
+    [HttpGet("mine")]
+    [Authorize(Policy = PolicyNames.CoachAccess)]
+    public async Task<ActionResult<IReadOnlyList<ClassOccurrenceResponse>>> Mine(
+        [FromQuery] DateTime fromUtc, [FromQuery] DateTime toUtc, CancellationToken ct)
+        => Ok(await _scheduleService.ListOccurrencesAsync(fromUtc, toUtc, activityId: null, instructorUserId: this.GetUserId(), ct: ct));
 
     [HttpPatch("{id:guid}")]
     [Authorize(Policy = PolicyNames.OperationalAccess)]
@@ -120,7 +128,24 @@ public class ClassOccurrencesController : ControllerBase
         => Ok(await _scheduleService.UpdateOccurrenceAsync(id, request, ct));
 
     [HttpGet("{id:guid}/roster")]
-    [Authorize(Policy = PolicyNames.OperationalAccess)]
+    [Authorize(Policy = PolicyNames.OperationalOrCoach)]
     public async Task<ActionResult<IReadOnlyList<RosterEntryResponse>>> Roster(Guid id, CancellationToken ct)
-        => Ok(await _bookingService.GetRosterAsync(id, ct));
+    {
+        await EnsureCanActOnOccurrenceAsync(id, ct);
+        return Ok(await _bookingService.GetRosterAsync(id, ct));
+    }
+
+    private async Task EnsureCanActOnOccurrenceAsync(Guid occurrenceId, CancellationToken ct)
+    {
+        if (User.IsInRole(CrewFlow.Domain.Identity.RoleNames.Admin) || User.IsInRole(CrewFlow.Domain.Identity.RoleNames.Operational))
+        {
+            return;
+        }
+
+        var instructorId = await _scheduleService.GetOccurrenceInstructorIdAsync(occurrenceId, ct);
+        if (instructorId != this.GetUserId())
+        {
+            throw new ForbiddenException("You can only manage classes you instruct.");
+        }
+    }
 }
