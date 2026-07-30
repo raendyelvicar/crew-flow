@@ -7,13 +7,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CrewFlow.Infrastructure.Identity;
 
-// Dev/demo convenience: seeds the four roles, one account per staff role, and a
+// Dev/demo convenience: seeds every role, one demo account per role, and a
 // handful of dance styles so the scaffold is immediately usable without manual setup.
 public static class DataSeeder
 {
     public const string DefaultAdminEmail = "admin@crewflow.dev";
     public const string DefaultFinanceEmail = "finance@crewflow.dev";
     public const string DefaultOperationalEmail = "operations@crewflow.dev";
+    public const string DefaultMemberEmail = "member@crewflow.dev";
     public const string DefaultStaffPassword = "ChangeMe123!";
 
     public static async Task SeedAsync(IServiceProvider services)
@@ -33,6 +34,7 @@ public static class DataSeeder
         await EnsureStaffUserAsync(userManager, DefaultAdminEmail, "Studio", "Admin", RoleNames.Admin);
         await EnsureStaffUserAsync(userManager, DefaultFinanceEmail, "Studio", "Finance", RoleNames.Finance);
         await EnsureStaffUserAsync(userManager, DefaultOperationalEmail, "Studio", "Operations", RoleNames.Operational);
+        await EnsureMemberUserAsync(userManager, db, DefaultMemberEmail, "Demo", "Member");
 
         if (!await db.DanceStyles.AnyAsync())
         {
@@ -70,5 +72,43 @@ public static class DataSeeder
         {
             await userManager.AddToRoleAsync(user, role);
         }
+    }
+
+    private static async Task EnsureMemberUserAsync(
+        UserManager<ApplicationUser> userManager, AppDbContext db, string email, string firstName, string lastName)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is not null)
+        {
+            return;
+        }
+
+        user = new ApplicationUser
+        {
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true,
+            FirstName = firstName,
+            LastName = lastName,
+        };
+
+        var result = await userManager.CreateAsync(user, DefaultStaffPassword);
+        if (!result.Succeeded)
+        {
+            return;
+        }
+
+        await userManager.AddToRoleAsync(user, RoleNames.Member);
+
+        db.Members.Add(new Member
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            FirstName = firstName,
+            LastName = lastName,
+            Email = email,
+            Status = MemberStatus.Active,
+        });
+        await db.SaveChangesAsync();
     }
 }
