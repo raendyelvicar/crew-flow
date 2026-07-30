@@ -7,6 +7,7 @@ using CrewFlow.Domain.Identity;
 using CrewFlow.Domain.Members;
 using CrewFlow.Domain.Scheduling;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace CrewFlow.Application.Tests.Bookings;
@@ -62,8 +63,8 @@ public class BookingServiceTests : IDisposable
             db.Activities.Add(activity);
             db.ClassSchedules.Add(schedule);
             db.ClassOccurrences.Add(occurrence);
-            db.Subscriptions.Add(new Subscription { Id = Guid.NewGuid(), MemberId = memberAId, MembershipPlanId = plan.Id, Status = SubscriptionStatus.Active });
-            db.Subscriptions.Add(new Subscription { Id = Guid.NewGuid(), MemberId = memberBId, MembershipPlanId = plan.Id, Status = SubscriptionStatus.Active });
+            db.Subscriptions.Add(new Subscription { Id = Guid.NewGuid(), MemberId = memberAId, MembershipPlanId = plan.Id, Status = SubscriptionStatus.Active, CreditsRemainingThisPeriod = 4 });
+            db.Subscriptions.Add(new Subscription { Id = Guid.NewGuid(), MemberId = memberBId, MembershipPlanId = plan.Id, Status = SubscriptionStatus.Active, CreditsRemainingThisPeriod = 4 });
             await db.SaveChangesAsync();
         }
 
@@ -77,7 +78,19 @@ public class BookingServiceTests : IDisposable
         bookingB.Status.Should().Be(BookingStatus.Waitlisted);
         bookingB.WaitlistPosition.Should().Be(1);
 
+        await using (var dbCheck = _factory.CreateContext())
+        {
+            var sub = await dbCheck.Subscriptions.FirstAsync(s => s.MemberId == memberAId);
+            sub.CreditsRemainingThisPeriod.Should().Be(3, "one credit was spent booking bookingA");
+        }
+
         await service.CancelBookingAsync(bookingA.Id);
+
+        await using (var dbCheck = _factory.CreateContext())
+        {
+            var sub = await dbCheck.Subscriptions.FirstAsync(s => s.MemberId == memberAId);
+            sub.CreditsRemainingThisPeriod.Should().Be(4, "cancelling the booking should refund the spent subscription credit");
+        }
 
         var roster = await service.GetRosterAsync(occurrenceId);
         roster.Should().ContainSingle(r => r.MemberId == memberBId && r.Status == BookingStatus.Booked);
@@ -126,6 +139,62 @@ public class BookingServiceTests : IDisposable
             db.Activities.Add(activity);
             db.ClassSchedules.Add(schedule);
             db.ClassOccurrences.Add(occurrence);
+            await db.SaveChangesAsync();
+        }
+
+        await using var db2 = _factory.CreateContext();
+        var service = new BookingService(db2);
+
+        var act = () => service.CreateBookingAsync(new CreateBookingRequest(occurrenceId, memberId));
+        await act.Should().ThrowAsync<ConflictException>();
+    }
+
+    [Fact]
+    public async Task CreateBooking_Throws_WhenSubscriptionHasNoCreditsRemainingThisPeriod()
+    {
+        var memberId = Guid.NewGuid();
+        var occurrenceId = Guid.NewGuid();
+
+        await using (var db = _factory.CreateContext())
+        {
+            var plan = new MembershipPlan { Id = Guid.NewGuid(), Name = "Monthly", BillingInterval = BillingInterval.Monthly, CreditsPerPeriod = 4, PriceAmount = 400_000 };
+            var genre = new DanceStyle { Id = Guid.NewGuid(), Name = "Salsa" };
+            var classType = new ClassType { Id = Guid.NewGuid(), Name = "Regular" };
+            var activity = new Activity { Id = Guid.NewGuid(), Name = "Salsa", ClassGenreId = genre.Id, ClassTypeId = classType.Id, DefaultCapacity = 5, DefaultDurationMinutes = 60 };
+            var instructorId = Guid.NewGuid();
+            var schedule = new ClassSchedule
+            {
+                Id = Guid.NewGuid(),
+                ActivityId = activity.Id,
+                InstructorUserId = instructorId,
+                DayOfWeek = DayOfWeek.Monday,
+                StartTimeLocal = new TimeOnly(18, 0),
+                DurationMinutes = 60,
+                Capacity = 5,
+                Timezone = "UTC",
+                EffectiveFromDate = DateOnly.FromDateTime(DateTime.UtcNow),
+            };
+            var occurrence = new ClassOccurrence
+            {
+                Id = occurrenceId,
+                ClassScheduleId = schedule.Id,
+                ActivityId = activity.Id,
+                InstructorUserId = instructorId,
+                StartAtUtc = DateTime.UtcNow.AddDays(1),
+                EndAtUtc = DateTime.UtcNow.AddDays(1).AddHours(1),
+                Capacity = 5,
+                Status = OccurrenceStatus.Scheduled,
+            };
+
+            db.MembershipPlans.Add(plan);
+            db.DanceStyles.Add(genre);
+            db.ClassTypes.Add(classType);
+            db.Members.Add(new Member { Id = memberId, FirstName = "D", LastName = "D", Email = "d@test.com" });
+            db.Users.Add(new ApplicationUser { Id = instructorId, UserName = "instructor3@test.com", Email = "instructor3@test.com", FirstName = "In", LastName = "Structor" });
+            db.Activities.Add(activity);
+            db.ClassSchedules.Add(schedule);
+            db.ClassOccurrences.Add(occurrence);
+            db.Subscriptions.Add(new Subscription { Id = Guid.NewGuid(), MemberId = memberId, MembershipPlanId = plan.Id, Status = SubscriptionStatus.Active, CreditsRemainingThisPeriod = 0 });
             await db.SaveChangesAsync();
         }
 

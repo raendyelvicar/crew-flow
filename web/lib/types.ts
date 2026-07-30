@@ -137,6 +137,7 @@ export type MembershipPlan = {
   name: string;
   description?: string;
   billingInterval: BillingInterval;
+  creditsPerPeriod: number;
   priceAmount: number;
   currency: string;
   isActive: boolean;
@@ -161,6 +162,8 @@ export type Subscription = {
   currentPeriodStartUtc?: string;
   currentPeriodEndUtc?: string;
   cancelAtPeriodEnd: boolean;
+  creditsRemainingThisPeriod: number;
+  creditsPerPeriod: number;
 };
 
 export type CreditPack = {

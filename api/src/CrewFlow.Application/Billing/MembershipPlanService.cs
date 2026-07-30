@@ -37,6 +37,7 @@ public class MembershipPlanService
             Name = request.Name,
             Description = request.Description,
             BillingInterval = request.BillingInterval,
+            CreditsPerPeriod = request.CreditsPerPeriod,
             PriceAmount = request.PriceAmount,
             Currency = request.Currency,
             StripeProductId = productId,
@@ -62,6 +63,7 @@ public class MembershipPlanService
         plan.Name = request.Name;
         plan.Description = request.Description;
         plan.BillingInterval = request.BillingInterval;
+        plan.CreditsPerPeriod = request.CreditsPerPeriod;
         plan.PriceAmount = request.PriceAmount;
         plan.Currency = request.Currency;
         plan.StripeProductId = productId;
@@ -74,5 +76,5 @@ public class MembershipPlanService
     }
 
     private static MembershipPlanResponse Map(MembershipPlan p) => new(
-        p.Id, p.Name, p.Description, p.BillingInterval, p.PriceAmount, p.Currency, p.IsActive, p.SortOrder);
+        p.Id, p.Name, p.Description, p.BillingInterval, p.CreditsPerPeriod, p.PriceAmount, p.Currency, p.IsActive, p.SortOrder);
 }

@@ -19,12 +19,15 @@ export function PricingCards({ plans }: { plans: MembershipPlan[] }) {
             <CardTitle>{plan.name}</CardTitle>
             <CardDescription>{plan.description}</CardDescription>
           </CardHeader>
-          <CardContent className="flex-1">
+          <CardContent className="flex-1 space-y-1">
             <p className="text-3xl font-bold">
               {formatMoney(plan.priceAmount, plan.currency)}
               <span className="text-sm font-normal text-muted-foreground">
                 /{plan.billingInterval === "Monthly" ? "mo" : "yr"}
               </span>
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {plan.creditsPerPeriod} classes / {plan.billingInterval === "Monthly" ? "month" : "year"}
             </p>
           </CardContent>
           <CardFooter>

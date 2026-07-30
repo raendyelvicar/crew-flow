@@ -179,7 +179,11 @@ public class StripeService : IStripeService
     // stable across the event types this scaffold handles.
     public StripeWebhookEvent ParseWebhookEvent(string payload, string signatureHeader)
     {
-        var verifiedEvent = EventUtility.ConstructEvent(payload, signatureHeader, _options.WebhookSecret);
+        // We parse raw JSON fields ourselves (see below) rather than relying on Stripe.net's typed
+        // Event.Data.Object, specifically so a live account's API version can move ahead of the
+        // Stripe.net package's pinned version without breaking webhook delivery.
+        var verifiedEvent = EventUtility.ConstructEvent(
+            payload, signatureHeader, _options.WebhookSecret, throwOnApiVersionMismatch: false);
 
         using var doc = JsonDocument.Parse(payload);
         var dataObject = doc.RootElement.GetProperty("data").GetProperty("object");

@@ -3,14 +3,15 @@ using CrewFlow.Domain.Billing;
 namespace CrewFlow.Application.Billing;
 
 public record MembershipPlanResponse(
-    Guid Id, string Name, string? Description, BillingInterval BillingInterval, int PriceAmount, string Currency, bool IsActive, int SortOrder);
+    Guid Id, string Name, string? Description, BillingInterval BillingInterval, int CreditsPerPeriod, int PriceAmount, string Currency, bool IsActive, int SortOrder);
 
 public record UpsertMembershipPlanRequest(
-    string Name, string? Description, BillingInterval BillingInterval, int PriceAmount, string Currency, bool IsActive, int SortOrder);
+    string Name, string? Description, BillingInterval BillingInterval, int CreditsPerPeriod, int PriceAmount, string Currency, bool IsActive, int SortOrder);
 
 public record SubscriptionResponse(
     Guid Id, Guid MemberId, Guid MembershipPlanId, string PlanName, SubscriptionStatus Status,
-    DateTime? CurrentPeriodStartUtc, DateTime? CurrentPeriodEndUtc, bool CancelAtPeriodEnd);
+    DateTime? CurrentPeriodStartUtc, DateTime? CurrentPeriodEndUtc, bool CancelAtPeriodEnd,
+    int CreditsRemainingThisPeriod, int CreditsPerPeriod);
 
 public record CreateSubscriptionCheckoutRequest(Guid MemberId, Guid MembershipPlanId, string SuccessUrl, string CancelUrl);
 

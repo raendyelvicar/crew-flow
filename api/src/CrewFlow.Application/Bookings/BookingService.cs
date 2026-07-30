@@ -58,7 +58,7 @@ public class BookingService
             throw new ConflictException("This member already has an active booking for this class.");
         }
 
-        var (paymentMethod, creditPackPurchaseId) = await ResolvePaymentMethodAsync(request.MemberId, ct);
+        var (paymentMethod, creditPackPurchaseId, subscriptionId) = await ResolvePaymentMethodAsync(request.MemberId, ct);
 
         var bookedCount = occurrence.Bookings.Count(b => b.Status == BookingStatus.Booked);
         var status = bookedCount < occurrence.Capacity ? BookingStatus.Booked : BookingStatus.Waitlisted;
@@ -73,6 +73,10 @@ public class BookingService
         {
             await SpendCreditAsync(creditPackPurchaseId!.Value, ct);
         }
+        else if (paymentMethod == BookingPaymentMethod.Subscription)
+        {
+            await SpendSubscriptionCreditAsync(subscriptionId!.Value, ct);
+        }
 
         var booking = new Booking
         {
@@ -82,6 +86,7 @@ public class BookingService
             Status = status,
             PaymentMethod = paymentMethod,
             CreditPackPurchaseId = creditPackPurchaseId,
+            SubscriptionId = subscriptionId,
             WaitlistPosition = waitlistPosition,
         };
 
@@ -116,6 +121,14 @@ public class BookingService
                 {
                     purchase.Status = CreditPackPurchaseStatus.Active;
                 }
+            }
+        }
+        else if (booking.PaymentMethod == BookingPaymentMethod.Subscription && booking.SubscriptionId is not null)
+        {
+            var subscription = await _db.Subscriptions.FirstOrDefaultAsync(s => s.Id == booking.SubscriptionId, ct);
+            if (subscription is not null)
+            {
+                subscription.CreditsRemainingThisPeriod += 1;
             }
         }
 
@@ -248,14 +261,14 @@ public class BookingService
         return reviews.Select(MapReview).ToList();
     }
 
-    private async Task<(BookingPaymentMethod Method, Guid? CreditPackPurchaseId)> ResolvePaymentMethodAsync(Guid memberId, CancellationToken ct)
+    private async Task<(BookingPaymentMethod Method, Guid? CreditPackPurchaseId, Guid? SubscriptionId)> ResolvePaymentMethodAsync(Guid memberId, CancellationToken ct)
     {
-        var hasActiveSubscription = await _db.Subscriptions.AnyAsync(s =>
+        var subscription = await _db.Subscriptions.FirstOrDefaultAsync(s =>
             s.MemberId == memberId && (s.Status == SubscriptionStatus.Active || s.Status == SubscriptionStatus.Trialing), ct);
 
-        if (hasActiveSubscription)
+        if (subscription is not null && subscription.CreditsRemainingThisPeriod > 0)
         {
-            return (BookingPaymentMethod.Subscription, null);
+            return (BookingPaymentMethod.Subscription, null, subscription.Id);
         }
 
         var candidatePurchases = await _db.CreditPackPurchases
@@ -266,10 +279,12 @@ public class BookingService
         var usablePurchase = candidatePurchases.FirstOrDefault(p => p.HasUsableCredits);
         if (usablePurchase is not null)
         {
-            return (BookingPaymentMethod.Credit, usablePurchase.Id);
+            return (BookingPaymentMethod.Credit, usablePurchase.Id, null);
         }
 
-        throw new ConflictException("An active subscription or class credit is required to book this class.");
+        throw new ConflictException(subscription is not null
+            ? "Your membership has no class credits remaining this period, and you have no class credit packs."
+            : "An active subscription or class credit is required to book this class.");
     }
 
     private async Task SpendCreditAsync(Guid creditPackPurchaseId, CancellationToken ct)
@@ -282,6 +297,14 @@ public class BookingService
         {
             purchase.Status = CreditPackPurchaseStatus.Depleted;
         }
+    }
+
+    private async Task SpendSubscriptionCreditAsync(Guid subscriptionId, CancellationToken ct)
+    {
+        var subscription = await _db.Subscriptions.FirstOrDefaultAsync(s => s.Id == subscriptionId, ct)
+            ?? throw new NotFoundException(nameof(Subscription), subscriptionId);
+
+        subscription.CreditsRemainingThisPeriod -= 1;
     }
 
     private static BookingResponse MapBooking(Booking b) => new(

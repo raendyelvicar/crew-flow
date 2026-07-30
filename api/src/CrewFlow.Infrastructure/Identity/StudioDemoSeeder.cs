@@ -193,13 +193,13 @@ public static class StudioDemoSeeder
         db.MembershipPlans.AddRange(
             new MembershipPlan
             {
-                Id = Guid.NewGuid(), Name = "Regular Class Membership", Description = "Unlimited regular weekly classes.",
-                BillingInterval = BillingInterval.Monthly, PriceAmount = 400_000, Currency = "idr", IsActive = true, SortOrder = 0,
+                Id = Guid.NewGuid(), Name = "Regular Class Membership", Description = "4 regular weekly classes per month.",
+                BillingInterval = BillingInterval.Monthly, CreditsPerPeriod = 4, PriceAmount = 400_000, Currency = "idr", IsActive = true, SortOrder = 0,
             },
             new MembershipPlan
             {
-                Id = Guid.NewGuid(), Name = "Kids Class Membership", Description = "Unlimited kids classes.",
-                BillingInterval = BillingInterval.Monthly, PriceAmount = 460_000, Currency = "idr", IsActive = true, SortOrder = 1,
+                Id = Guid.NewGuid(), Name = "Kids Class Membership", Description = "4 kids classes per month.",
+                BillingInterval = BillingInterval.Monthly, CreditsPerPeriod = 4, PriceAmount = 460_000, Currency = "idr", IsActive = true, SortOrder = 1,
             });
 
         db.CreditPacks.AddRange(

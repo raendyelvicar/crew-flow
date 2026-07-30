@@ -55,6 +55,7 @@ public class SubscriptionService
             MembershipPlanId = plan.Id,
             StripeCustomerId = customerId,
             Status = SubscriptionStatus.Incomplete,
+            CreditsRemainingThisPeriod = plan.CreditsPerPeriod,
         });
         await _db.SaveChangesAsync(ct);
 
@@ -108,5 +109,6 @@ public class SubscriptionService
 
     private static SubscriptionResponse Map(Subscription s) => new(
         s.Id, s.MemberId, s.MembershipPlanId, s.MembershipPlan?.Name ?? string.Empty, s.Status,
-        s.CurrentPeriodStartUtc, s.CurrentPeriodEndUtc, s.CancelAtPeriodEnd);
+        s.CurrentPeriodStartUtc, s.CurrentPeriodEndUtc, s.CancelAtPeriodEnd,
+        s.CreditsRemainingThisPeriod, s.MembershipPlan?.CreditsPerPeriod ?? 0);
 }

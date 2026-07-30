@@ -12,11 +12,14 @@ public class StripeWebhookController : ControllerBase
 {
     private readonly IStripeService _stripeService;
     private readonly StripeWebhookProcessingService _processingService;
+    private readonly ILogger<StripeWebhookController> _logger;
 
-    public StripeWebhookController(IStripeService stripeService, StripeWebhookProcessingService processingService)
+    public StripeWebhookController(
+        IStripeService stripeService, StripeWebhookProcessingService processingService, ILogger<StripeWebhookController> logger)
     {
         _stripeService = stripeService;
         _processingService = processingService;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -31,8 +34,9 @@ public class StripeWebhookController : ControllerBase
         {
             evt = _stripeService.ParseWebhookEvent(payload, signatureHeader);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Rejected Stripe webhook: signature/payload verification failed.");
             return BadRequest();
         }
 

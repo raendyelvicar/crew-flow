@@ -41,8 +41,9 @@ export default async function MembershipPage() {
               <div>
                 <p className="font-medium">{subscription.planName}</p>
                 <p className="text-sm text-muted-foreground">
+                  {subscription.creditsRemainingThisPeriod} / {subscription.creditsPerPeriod} classes remaining this period
                   {subscription.currentPeriodEndUtc &&
-                    `Renews ${new Date(subscription.currentPeriodEndUtc).toLocaleDateString()}`}
+                    ` - renews ${new Date(subscription.currentPeriodEndUtc).toLocaleDateString()}`}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -67,12 +68,17 @@ export default async function MembershipPage() {
                 <CardDescription>{plan.description}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-2xl font-bold">
-                  {formatMoney(plan.priceAmount, plan.currency)}
-                  <span className="text-sm font-normal text-muted-foreground">
-                    /{plan.billingInterval === "Monthly" ? "mo" : "yr"}
-                  </span>
-                </p>
+                <div>
+                  <p className="text-2xl font-bold">
+                    {formatMoney(plan.priceAmount, plan.currency)}
+                    <span className="text-sm font-normal text-muted-foreground">
+                      /{plan.billingInterval === "Monthly" ? "mo" : "yr"}
+                    </span>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {plan.creditsPerPeriod} classes / {plan.billingInterval === "Monthly" ? "month" : "year"}
+                  </p>
+                </div>
                 <SubscribeButton membershipPlanId={plan.id} />
               </CardContent>
             </Card>

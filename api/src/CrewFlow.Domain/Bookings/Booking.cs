@@ -21,6 +21,11 @@ public class Booking
     public Guid? CreditPackPurchaseId { get; set; }
     public CreditPackPurchase? CreditPackPurchase { get; set; }
 
+    // Set only when PaymentMethod == Subscription; one credit is spent/refunded against the
+    // subscription's current-period allotment alongside this booking.
+    public Guid? SubscriptionId { get; set; }
+    public Subscription? Subscription { get; set; }
+
     public DateTime BookedAtUtc { get; set; } = DateTime.UtcNow;
     public int? WaitlistPosition { get; set; }
     public DateTime? CancelledAtUtc { get; set; }

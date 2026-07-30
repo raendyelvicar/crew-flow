@@ -18,6 +18,7 @@ export function PlanDialog({ plan }: { plan?: MembershipPlan }) {
     name: plan?.name ?? "",
     description: plan?.description ?? "",
     billingInterval: plan?.billingInterval ?? "Monthly",
+    creditsPerPeriod: plan?.creditsPerPeriod.toString() ?? "",
     priceAmount: plan?.priceAmount.toString() ?? "",
     isActive: plan?.isActive ?? true,
   });
@@ -86,6 +87,17 @@ export function PlanDialog({ plan }: { plan?: MembershipPlan }) {
                 onChange={(e) => setForm({ ...form, priceAmount: e.target.value })}
               />
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="creditsPerPeriod">Classes per period</Label>
+            <Input
+              id="creditsPerPeriod"
+              type="number"
+              min={1}
+              required
+              value={form.creditsPerPeriod}
+              onChange={(e) => setForm({ ...form, creditsPerPeriod: e.target.value })}
+            />
           </div>
           <div className="flex items-center gap-2">
             <Switch id="isActive" checked={form.isActive} onCheckedChange={(v) => setForm({ ...form, isActive: v })} />

@@ -18,6 +18,11 @@ public class Subscription
     public SubscriptionStatus Status { get; set; } = SubscriptionStatus.Incomplete;
     public DateTime? CurrentPeriodStartUtc { get; set; }
     public DateTime? CurrentPeriodEndUtc { get; set; }
+
+    // Reset to MembershipPlan.CreditsPerPeriod whenever the current billing period rolls over
+    // (see StripeWebhookProcessingService.HandleSubscriptionUpsertAsync) - unused credits are
+    // forfeited at renewal, they do not carry over.
+    public int CreditsRemainingThisPeriod { get; set; }
     public bool CancelAtPeriodEnd { get; set; }
     public DateTime? CanceledAtUtc { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;

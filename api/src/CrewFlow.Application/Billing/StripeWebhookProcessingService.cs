@@ -105,10 +105,24 @@ public class StripeWebhookProcessingService
 
         if (subscription is null) return;
 
+        // A changed period start means a new billing cycle rolled over (or this is the first
+        // time the subscription becomes active) - the plan's per-period credit allotment
+        // refreshes and any unused credits from the prior period are forfeited.
+        var isNewPeriod = subscription.CurrentPeriodStartUtc != evt.CurrentPeriodStartUtc;
+
         subscription.Status = MapStripeStatus(evt.SubscriptionStatus);
         subscription.CurrentPeriodStartUtc = evt.CurrentPeriodStartUtc;
         subscription.CurrentPeriodEndUtc = evt.CurrentPeriodEndUtc;
         subscription.CancelAtPeriodEnd = evt.CancelAtPeriodEnd;
+
+        if (isNewPeriod)
+        {
+            var plan = await _db.MembershipPlans.FirstOrDefaultAsync(p => p.Id == subscription.MembershipPlanId, ct);
+            if (plan is not null)
+            {
+                subscription.CreditsRemainingThisPeriod = plan.CreditsPerPeriod;
+            }
+        }
 
         await _db.SaveChangesAsync(ct);
     }

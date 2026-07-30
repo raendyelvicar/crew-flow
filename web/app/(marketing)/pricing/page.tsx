@@ -18,7 +18,7 @@ export default async function PricingPage() {
           <div className="mb-8 text-center">
             <h1 className="text-2xl font-bold tracking-tight sm:text-4xl">Membership</h1>
             <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-              Choose a monthly plan for unlimited classes, or a drop-in credit pack below.
+              Choose a monthly plan with a set number of classes, or a drop-in credit pack below.
             </p>
           </div>
           <PricingCards plans={plans} />

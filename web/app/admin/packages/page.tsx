@@ -33,6 +33,8 @@ export default async function PackagesPage() {
                 </div>
                 <p className="text-sm text-muted-foreground">
                   {formatMoney(plan.priceAmount, plan.currency)} / {plan.billingInterval === "Monthly" ? "mo" : "yr"}
+                  {" - "}
+                  {plan.creditsPerPeriod} classes
                 </p>
               </div>
               <PlanDialog plan={plan} />

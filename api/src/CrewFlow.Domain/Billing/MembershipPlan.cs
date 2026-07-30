@@ -6,6 +6,7 @@ public class MembershipPlan
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public BillingInterval BillingInterval { get; set; }
+    public int CreditsPerPeriod { get; set; }
     public int PriceAmount { get; set; }
     public string Currency { get; set; } = "usd";
     public string? StripePriceId { get; set; }

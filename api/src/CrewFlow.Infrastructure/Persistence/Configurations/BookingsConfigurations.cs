@@ -27,6 +27,11 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .WithMany()
             .HasForeignKey(b => b.CreditPackPurchaseId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(b => b.Subscription)
+            .WithMany()
+            .HasForeignKey(b => b.SubscriptionId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
 

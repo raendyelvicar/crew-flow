@@ -8,6 +8,7 @@ export type PlanFormInput = {
   name: string;
   description: string;
   billingInterval: BillingInterval;
+  creditsPerPeriod: string;
   priceAmount: string;
   isActive: boolean;
 };
@@ -17,6 +18,7 @@ export async function savePlan(id: string | null, form: PlanFormInput) {
     name: form.name,
     description: form.description || undefined,
     billingInterval: form.billingInterval,
+    creditsPerPeriod: Number(form.creditsPerPeriod),
     priceAmount: Number(form.priceAmount),
     currency: "idr",
     isActive: form.isActive,
